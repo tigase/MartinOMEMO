@@ -1,0 +1,67 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 50;
+	objects = {
+
+/* Begin PBXGroup section */
+		FE02DB912259E12A00FA08EB = {
+			isa = PBXGroup;
+			children = (
+			);
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXProject section */
+		FE02DB922259E12A00FA08EB /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 1020;
+			};
+			buildConfigurationList = FE02DB952259E12A00FA08EB /* Build configuration list for PBXProject "TigaseSwiftOMEMO" */;
+			compatibilityVersion = "Xcode 9.3";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = FE02DB912259E12A00FA08EB;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+			);
+		};
+/* End PBXProject section */
+
+/* Begin XCBuildConfiguration section */
+		FE02DB962259E12A00FA08EB /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+			};
+			name = Debug;
+		};
+		FE02DB972259E12A00FA08EB /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		FE02DB952259E12A00FA08EB /* Build configuration list for PBXProject "TigaseSwiftOMEMO" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				FE02DB962259E12A00FA08EB /* Debug */,
+				FE02DB972259E12A00FA08EB /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = FE02DB922259E12A00FA08EB /* Project object */;
+}
