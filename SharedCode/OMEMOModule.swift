@@ -641,15 +641,15 @@ open class OMEMOModule: AbstractPEPModule {
                 return nil;
             }
             
-            guard let signedKeyPublic = el.findChild(name: "signedPreKeyPublic"), let signedPreKeyIdStr = signedKeyPublic.getAttribute("signedPreKeyId"), let signedPreKeyId = UInt32(signedPreKeyIdStr), let signedKeyPublicValue = signedKeyPublic.value, let signedKeyPublicData = Data(base64Encoded: signedKeyPublicValue) else {
+            guard let signedKeyPublic = el.findChild(name: "signedPreKeyPublic"), let signedPreKeyIdStr = signedKeyPublic.getAttribute("signedPreKeyId"), let signedPreKeyId = UInt32(signedPreKeyIdStr), let signedKeyPublicValue = signedKeyPublic.value, let signedKeyPublicData = Data(base64Encoded: signedKeyPublicValue, options: [.ignoreUnknownCharacters]) else {
                 return nil;
             }
 
-            guard let identityKeyValue = el.findChild(name: "identityKey")?.value, let identityKeyData = Data(base64Encoded: identityKeyValue) else {
+            guard let identityKeyValue = el.findChild(name: "identityKey")?.value, let identityKeyData = Data(base64Encoded: identityKeyValue, options: [.ignoreUnknownCharacters]) else {
                 return nil;
             }
 
-            guard let signatureValue = el.findChild(name: "signedPreKeySignature")?.value, let signatureData = Data(base64Encoded: signatureValue) else {
+            guard let signatureValue = el.findChild(name: "signedPreKeySignature")?.value, let signatureData = Data(base64Encoded: signatureValue, options: [.ignoreUnknownCharacters]) else {
                 return nil;
             }
             
@@ -671,7 +671,7 @@ open class OMEMOModule: AbstractPEPModule {
             guard from.name == "preKeyPublic", let value = from.value, let preKeyIdStr = from.getAttribute("preKeyId") else {
                 return nil;
             }
-            guard let data = Data(base64Encoded: value, options: []), let preKeyId = UInt32(preKeyIdStr) else {
+            guard let data = Data(base64Encoded: value, options: [.ignoreUnknownCharacters]), let preKeyId = UInt32(preKeyIdStr) else {
                 return nil;
             }
             
