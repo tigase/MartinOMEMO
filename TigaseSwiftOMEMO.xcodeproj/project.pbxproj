@@ -7,6 +7,27 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		FE719E5C2270C8C2007CEEC9 /* TigaseSwift.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FE719E5B2270C8C2007CEEC9 /* TigaseSwift.framework */; };
+		FE719E5D2270CA25007CEEC9 /* utility.c in Sources */ = {isa = PBXBuildFile; fileRef = FEB1568C225FB5A8009B0709 /* utility.c */; };
+		FE719E5E2270CA25007CEEC9 /* fe_isequal.c in Sources */ = {isa = PBXBuildFile; fileRef = FEB1568D225FB5A8009B0709 /* fe_isequal.c */; };
+		FE719E5F2270CA25007CEEC9 /* ge_montx_to_p3.c in Sources */ = {isa = PBXBuildFile; fileRef = FEB1568E225FB5A8009B0709 /* ge_montx_to_p3.c */; };
+		FE719E602270CA25007CEEC9 /* xeddsa.h in Headers */ = {isa = PBXBuildFile; fileRef = FEB1568F225FB5A8009B0709 /* xeddsa.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		FE719E612270CA25007CEEC9 /* sign_modified.c in Sources */ = {isa = PBXBuildFile; fileRef = FEB15690225FB5A8009B0709 /* sign_modified.c */; };
+		FE719E622270CA25007CEEC9 /* ge_scalarmult.c in Sources */ = {isa = PBXBuildFile; fileRef = FEB15691225FB5A8009B0709 /* ge_scalarmult.c */; };
+		FE719E632270CA25007CEEC9 /* keygen.h in Headers */ = {isa = PBXBuildFile; fileRef = FEB15692225FB5A8009B0709 /* keygen.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		FE719E642270CA25007CEEC9 /* ge_scalarmult_cofactor.c in Sources */ = {isa = PBXBuildFile; fileRef = FEB15693225FB5A8009B0709 /* ge_scalarmult_cofactor.c */; };
+		FE719E652270CA25007CEEC9 /* compare.h in Headers */ = {isa = PBXBuildFile; fileRef = FEB15694225FB5A8009B0709 /* compare.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		FE719E662270CA25007CEEC9 /* zeroize.c in Sources */ = {isa = PBXBuildFile; fileRef = FEB15695225FB5A8009B0709 /* zeroize.c */; };
+		FE719E672270CA25007CEEC9 /* fe_sqrt.c in Sources */ = {isa = PBXBuildFile; fileRef = FEB15696225FB5A8009B0709 /* fe_sqrt.c */; };
+		FE719E682270CA25007CEEC9 /* curve_sigs.h in Headers */ = {isa = PBXBuildFile; fileRef = FEB15697225FB5A8009B0709 /* curve_sigs.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		FE719E692270CA25007CEEC9 /* ge_isneutral.c in Sources */ = {isa = PBXBuildFile; fileRef = FEB15698225FB5A8009B0709 /* ge_isneutral.c */; };
+		FE719E6A2270CA25007CEEC9 /* elligator.c in Sources */ = {isa = PBXBuildFile; fileRef = FEB15699225FB5A8009B0709 /* elligator.c */; };
+		FE719E6B2270CA25007CEEC9 /* xeddsa.c in Sources */ = {isa = PBXBuildFile; fileRef = FEB1569A225FB5A8009B0709 /* xeddsa.c */; };
+		FE719E6C2270CA25007CEEC9 /* utility.h in Headers */ = {isa = PBXBuildFile; fileRef = FEB1569B225FB5A8009B0709 /* utility.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		FE719E6D2270CA25007CEEC9 /* open_modified.c in Sources */ = {isa = PBXBuildFile; fileRef = FEB1569C225FB5A8009B0709 /* open_modified.c */; };
+		FE719E6E2270CA25007CEEC9 /* fe_isreduced.c in Sources */ = {isa = PBXBuildFile; fileRef = FEB1569D225FB5A8009B0709 /* fe_isreduced.c */; };
+		FE719E6F2270CA25007CEEC9 /* crypto_additions.h in Headers */ = {isa = PBXBuildFile; fileRef = FEB1569E225FB5A8009B0709 /* crypto_additions.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		FE719E702270CA25007CEEC9 /* ge_p3_to_montx.c in Sources */ = {isa = PBXBuildFile; fileRef = FEB1569F225FB5A8009B0709 /* ge_p3_to_montx.c */; };
 		FE9CDF0B226874A8001039C3 /* SignalError.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE9CDF0A226874A8001039C3 /* SignalError.swift */; };
 		FE9CDF0F226F33C8001039C3 /* LICENSE in Resources */ = {isa = PBXBuildFile; fileRef = FE9CDF0E226F33C8001039C3 /* LICENSE */; };
 		FEB15623225FB467009B0709 /* TigaseSwift_OMEMO_macOS.h in Headers */ = {isa = PBXBuildFile; fileRef = FEB15621225FB467009B0709 /* TigaseSwift_OMEMO_macOS.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -26,7 +47,6 @@
 		FEB156FF225FB5A9009B0709 /* sender_key_record.c in Sources */ = {isa = PBXBuildFile; fileRef = FEB15636225FB5A8009B0709 /* sender_key_record.c */; };
 		FEB15701225FB5A9009B0709 /* utarray.h in Headers */ = {isa = PBXBuildFile; fileRef = FEB15637225FB5A8009B0709 /* utarray.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		FEB15703225FB5A9009B0709 /* sender_key.h in Headers */ = {isa = PBXBuildFile; fileRef = FEB15638225FB5A8009B0709 /* sender_key.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		FEB15705225FB5A9009B0709 /* LICENSE in Resources */ = {isa = PBXBuildFile; fileRef = FEB15639225FB5A8009B0709 /* LICENSE */; };
 		FEB15707225FB5A9009B0709 /* session_cipher.c in Sources */ = {isa = PBXBuildFile; fileRef = FEB1563A225FB5A8009B0709 /* session_cipher.c */; };
 		FEB15709225FB5A9009B0709 /* LocalStorageProtocol.pb-c.c in Sources */ = {isa = PBXBuildFile; fileRef = FEB1563B225FB5A8009B0709 /* LocalStorageProtocol.pb-c.c */; };
 		FEB1570B225FB5A9009B0709 /* signal_protocol.c in Sources */ = {isa = PBXBuildFile; fileRef = FEB1563C225FB5A8009B0709 /* signal_protocol.c */; };
@@ -188,6 +208,167 @@
 		FEB15845225FB5A9009B0709 /* SignalCryptoProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = FEB156E1225FB5A8009B0709 /* SignalCryptoProvider.swift */; };
 		FEB15847225FB5A9009B0709 /* SignalSessionBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = FEB156E2225FB5A8009B0709 /* SignalSessionBuilder.swift */; };
 		FEB1584D225FB702009B0709 /* TigaseSwift.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FEB1584C225FB702009B0709 /* TigaseSwift.framework */; };
+		FED3537E2270BC7600B69C53 /* TigaseSwift_OMEMO_iOS.h in Headers */ = {isa = PBXBuildFile; fileRef = FED3537C2270BC7600B69C53 /* TigaseSwift_OMEMO_iOS.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		FED3538A2270C26800B69C53 /* SignalPreKeyBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = FEB15628225FB5A8009B0709 /* SignalPreKeyBundle.swift */; };
+		FED3538B2270C26800B69C53 /* SignalIdentityKeyPair.swift in Sources */ = {isa = PBXBuildFile; fileRef = FEB15629225FB5A8009B0709 /* SignalIdentityKeyPair.swift */; };
+		FED3538C2270C26800B69C53 /* SignalContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = FEB1562A225FB5A8009B0709 /* SignalContext.swift */; };
+		FED3538D2270C26800B69C53 /* SignalSessionCipher.swift in Sources */ = {isa = PBXBuildFile; fileRef = FEB1562B225FB5A8009B0709 /* SignalSessionCipher.swift */; };
+		FED353982270C27000B69C53 /* SignalIdentityKey.swift in Sources */ = {isa = PBXBuildFile; fileRef = FEB156DC225FB5A8009B0709 /* SignalIdentityKey.swift */; };
+		FED353992270C27000B69C53 /* SignalAddress.swift in Sources */ = {isa = PBXBuildFile; fileRef = FEB156DD225FB5A8009B0709 /* SignalAddress.swift */; };
+		FED3539A2270C27000B69C53 /* SignalStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = FEB156DE225FB5A8009B0709 /* SignalStorage.swift */; };
+		FED3539C2270C27000B69C53 /* OMEMOModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = FEB156E0225FB5A8009B0709 /* OMEMOModule.swift */; };
+		FED3539D2270C27000B69C53 /* SignalCryptoProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = FEB156E1225FB5A8009B0709 /* SignalCryptoProvider.swift */; };
+		FED3539E2270C27000B69C53 /* SignalSessionBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = FEB156E2225FB5A8009B0709 /* SignalSessionBuilder.swift */; };
+		FED3539F2270C27000B69C53 /* IdentityStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = FEEF252F2264897A00202B28 /* IdentityStatus.swift */; };
+		FED353A02270C27000B69C53 /* Identity.swift in Sources */ = {isa = PBXBuildFile; fileRef = FEEF25332264D4E700202B28 /* Identity.swift */; };
+		FED353A12270C27000B69C53 /* SignalError.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE9CDF0A226874A8001039C3 /* SignalError.swift */; };
+		FED353A22270C28A00B69C53 /* protocol.h in Headers */ = {isa = PBXBuildFile; fileRef = FEB1562D225FB5A8009B0709 /* protocol.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		FED353A32270C28A00B69C53 /* FingerprintProtocol.pb-c.h in Headers */ = {isa = PBXBuildFile; fileRef = FEB1562E225FB5A8009B0709 /* FingerprintProtocol.pb-c.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		FED353A42270C28A00B69C53 /* WhisperTextProtocol.pb-c.c in Sources */ = {isa = PBXBuildFile; fileRef = FEB1562F225FB5A8009B0709 /* WhisperTextProtocol.pb-c.c */; };
+		FED353A52270C28A00B69C53 /* session_builder.c in Sources */ = {isa = PBXBuildFile; fileRef = FEB15630225FB5A8009B0709 /* session_builder.c */; };
+		FED353A62270C28A00B69C53 /* utlist.h in Headers */ = {isa = PBXBuildFile; fileRef = FEB15631225FB5A8009B0709 /* utlist.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		FED353A72270C28A00B69C53 /* group_session_builder.h in Headers */ = {isa = PBXBuildFile; fileRef = FEB15632225FB5A8009B0709 /* group_session_builder.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		FED353A82270C28A00B69C53 /* curve.c in Sources */ = {isa = PBXBuildFile; fileRef = FEB15633225FB5A8009B0709 /* curve.c */; };
+		FED353A92270C28A00B69C53 /* session_record.c in Sources */ = {isa = PBXBuildFile; fileRef = FEB15634225FB5A8009B0709 /* session_record.c */; };
+		FED353AA2270C28A00B69C53 /* session_pre_key.c in Sources */ = {isa = PBXBuildFile; fileRef = FEB15635225FB5A8009B0709 /* session_pre_key.c */; };
+		FED353AB2270C28A00B69C53 /* sender_key_record.c in Sources */ = {isa = PBXBuildFile; fileRef = FEB15636225FB5A8009B0709 /* sender_key_record.c */; };
+		FED353AC2270C28A00B69C53 /* utarray.h in Headers */ = {isa = PBXBuildFile; fileRef = FEB15637225FB5A8009B0709 /* utarray.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		FED353AD2270C28A00B69C53 /* sender_key.h in Headers */ = {isa = PBXBuildFile; fileRef = FEB15638225FB5A8009B0709 /* sender_key.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		FED353AE2270C28A00B69C53 /* session_cipher.c in Sources */ = {isa = PBXBuildFile; fileRef = FEB1563A225FB5A8009B0709 /* session_cipher.c */; };
+		FED353AF2270C28A00B69C53 /* LocalStorageProtocol.pb-c.c in Sources */ = {isa = PBXBuildFile; fileRef = FEB1563B225FB5A8009B0709 /* LocalStorageProtocol.pb-c.c */; };
+		FED353B02270C28A00B69C53 /* signal_protocol.c in Sources */ = {isa = PBXBuildFile; fileRef = FEB1563C225FB5A8009B0709 /* signal_protocol.c */; };
+		FED353B12270C28A00B69C53 /* signal_protocol_internal.h in Headers */ = {isa = PBXBuildFile; fileRef = FEB1563D225FB5A8009B0709 /* signal_protocol_internal.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		FED353B22270C28A00B69C53 /* session_builder_internal.h in Headers */ = {isa = PBXBuildFile; fileRef = FEB1563E225FB5A8009B0709 /* session_builder_internal.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		FED353B32270C28A00B69C53 /* device_consistency.c in Sources */ = {isa = PBXBuildFile; fileRef = FEB1563F225FB5A8009B0709 /* device_consistency.c */; };
+		FED353B42270C28A00B69C53 /* sender_key_state.c in Sources */ = {isa = PBXBuildFile; fileRef = FEB15640225FB5A8009B0709 /* sender_key_state.c */; };
+		FED353B52270C28A00B69C53 /* hkdf.h in Headers */ = {isa = PBXBuildFile; fileRef = FEB15641225FB5A8009B0709 /* hkdf.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		FED353B62270C28A00B69C53 /* session_state.h in Headers */ = {isa = PBXBuildFile; fileRef = FEB15642225FB5A8009B0709 /* session_state.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		FED353B72270C28F00B69C53 /* vpool.h in Headers */ = {isa = PBXBuildFile; fileRef = FEB15646225FB5A8009B0709 /* vpool.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		FED353B82270C28F00B69C53 /* group_cipher.c in Sources */ = {isa = PBXBuildFile; fileRef = FEB15647225FB5A8009B0709 /* group_cipher.c */; };
+		FED353B92270C28F00B69C53 /* key_helper.c in Sources */ = {isa = PBXBuildFile; fileRef = FEB15648225FB5A8009B0709 /* key_helper.c */; };
+		FED353BA2270C28F00B69C53 /* fingerprint.c in Sources */ = {isa = PBXBuildFile; fileRef = FEB15649225FB5A8009B0709 /* fingerprint.c */; };
+		FED353BB2270C28F00B69C53 /* uthash.h in Headers */ = {isa = PBXBuildFile; fileRef = FEB1564A225FB5A8009B0709 /* uthash.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		FED353BC2270C28F00B69C53 /* ratchet.c in Sources */ = {isa = PBXBuildFile; fileRef = FEB1564B225FB5A8009B0709 /* ratchet.c */; };
+		FED353BD2270C28F00B69C53 /* curve.h in Headers */ = {isa = PBXBuildFile; fileRef = FEB1564C225FB5A8009B0709 /* curve.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		FED353BE2270C28F00B69C53 /* session_record.h in Headers */ = {isa = PBXBuildFile; fileRef = FEB1564D225FB5A8009B0709 /* session_record.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		FED353BF2270C28F00B69C53 /* session_builder.h in Headers */ = {isa = PBXBuildFile; fileRef = FEB1564E225FB5A8009B0709 /* session_builder.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		FED353C02270C28F00B69C53 /* WhisperTextProtocol.pb-c.h in Headers */ = {isa = PBXBuildFile; fileRef = FEB1564F225FB5A8009B0709 /* WhisperTextProtocol.pb-c.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		FED353C12270C28F00B69C53 /* FingerprintProtocol.pb-c.c in Sources */ = {isa = PBXBuildFile; fileRef = FEB15650225FB5A8009B0709 /* FingerprintProtocol.pb-c.c */; };
+		FED353C22270C28F00B69C53 /* group_session_builder.c in Sources */ = {isa = PBXBuildFile; fileRef = FEB15651225FB5A8009B0709 /* group_session_builder.c */; };
+		FED353C32270C28F00B69C53 /* protocol.c in Sources */ = {isa = PBXBuildFile; fileRef = FEB15652225FB5A8009B0709 /* protocol.c */; };
+		FED353C42270C28F00B69C53 /* signal_protocol.h in Headers */ = {isa = PBXBuildFile; fileRef = FEB15653225FB5A8009B0709 /* signal_protocol.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		FED353C52270C28F00B69C53 /* LocalStorageProtocol.pb-c.h in Headers */ = {isa = PBXBuildFile; fileRef = FEB15654225FB5A8009B0709 /* LocalStorageProtocol.pb-c.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		FED353C62270C28F00B69C53 /* session_cipher.h in Headers */ = {isa = PBXBuildFile; fileRef = FEB15655225FB5A8009B0709 /* session_cipher.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		FED353C72270C28F00B69C53 /* sender_key.c in Sources */ = {isa = PBXBuildFile; fileRef = FEB15656225FB5A8009B0709 /* sender_key.c */; };
+		FED353C82270C28F00B69C53 /* sender_key_record.h in Headers */ = {isa = PBXBuildFile; fileRef = FEB15657225FB5A8009B0709 /* sender_key_record.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		FED353C92270C28F00B69C53 /* session_pre_key.h in Headers */ = {isa = PBXBuildFile; fileRef = FEB15658225FB5A8009B0709 /* session_pre_key.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		FED353CA2270C28F00B69C53 /* signal_protocol_types.h in Headers */ = {isa = PBXBuildFile; fileRef = FEB15659225FB5A8009B0709 /* signal_protocol_types.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		FED353CB2270C28F00B69C53 /* session_state.c in Sources */ = {isa = PBXBuildFile; fileRef = FEB1565A225FB5A8009B0709 /* session_state.c */; };
+		FED353CC2270C28F00B69C53 /* sender_key_state.h in Headers */ = {isa = PBXBuildFile; fileRef = FEB1565B225FB5A8009B0709 /* sender_key_state.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		FED353CD2270C28F00B69C53 /* hkdf.c in Sources */ = {isa = PBXBuildFile; fileRef = FEB1565C225FB5A8009B0709 /* hkdf.c */; };
+		FED353CE2270C29200B69C53 /* device_consistency.h in Headers */ = {isa = PBXBuildFile; fileRef = FEB156D4225FB5A8009B0709 /* device_consistency.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		FED353CF2270C29200B69C53 /* libsignal-protocol-c.pc.in in Resources */ = {isa = PBXBuildFile; fileRef = FEB156D5225FB5A8009B0709 /* libsignal-protocol-c.pc.in */; };
+		FED353D02270C29200B69C53 /* ratchet.h in Headers */ = {isa = PBXBuildFile; fileRef = FEB156D6225FB5A8009B0709 /* ratchet.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		FED353D12270C29200B69C53 /* fingerprint.h in Headers */ = {isa = PBXBuildFile; fileRef = FEB156D7225FB5A8009B0709 /* fingerprint.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		FED353D22270C29200B69C53 /* signal_utarray.h in Headers */ = {isa = PBXBuildFile; fileRef = FEB156D8225FB5A8009B0709 /* signal_utarray.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		FED353D32270C29200B69C53 /* group_cipher.h in Headers */ = {isa = PBXBuildFile; fileRef = FEB156D9225FB5A8009B0709 /* group_cipher.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		FED353D42270C29200B69C53 /* key_helper.h in Headers */ = {isa = PBXBuildFile; fileRef = FEB156DA225FB5A8009B0709 /* key_helper.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		FED353D52270C29200B69C53 /* vpool.c in Sources */ = {isa = PBXBuildFile; fileRef = FEB156DB225FB5A8009B0709 /* vpool.c */; };
+		FED353D62270C29600B69C53 /* protobuf-c.h in Headers */ = {isa = PBXBuildFile; fileRef = FEB15644225FB5A8009B0709 /* protobuf-c.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		FED353D72270C29600B69C53 /* protobuf-c.c in Sources */ = {isa = PBXBuildFile; fileRef = FEB15645225FB5A8009B0709 /* protobuf-c.c */; };
+		FED353D82270C29C00B69C53 /* curve25519-donna.h in Headers */ = {isa = PBXBuildFile; fileRef = FEB1565E225FB5A8009B0709 /* curve25519-donna.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		FED353D92270C29C00B69C53 /* curve25519-donna.c in Sources */ = {isa = PBXBuildFile; fileRef = FEB1565F225FB5A8009B0709 /* curve25519-donna.c */; };
+		FED353DA2270C2AD00B69C53 /* ge_msub.c in Sources */ = {isa = PBXBuildFile; fileRef = FEB15661225FB5A8009B0709 /* ge_msub.c */; };
+		FED353DB2270C2AD00B69C53 /* fe_sq2.c in Sources */ = {isa = PBXBuildFile; fileRef = FEB15662225FB5A8009B0709 /* fe_sq2.c */; };
+		FED353DC2270C2AD00B69C53 /* sqrtm1.h in Headers */ = {isa = PBXBuildFile; fileRef = FEB15663225FB5A8009B0709 /* sqrtm1.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		FED353DD2270C2AD00B69C53 /* fe_pow22523.c in Sources */ = {isa = PBXBuildFile; fileRef = FEB15664225FB5A8009B0709 /* fe_pow22523.c */; };
+		FED353DE2270C2AD00B69C53 /* ge_madd.c in Sources */ = {isa = PBXBuildFile; fileRef = FEB15665225FB5A8009B0709 /* ge_madd.c */; };
+		FED353DF2270C2AD00B69C53 /* ge_p3_tobytes.c in Sources */ = {isa = PBXBuildFile; fileRef = FEB15666225FB5A8009B0709 /* ge_p3_tobytes.c */; };
+		FED353E02270C2AD00B69C53 /* ge_p3_dbl.c in Sources */ = {isa = PBXBuildFile; fileRef = FEB15667225FB5A8009B0709 /* ge_p3_dbl.c */; };
+		FED353E12270C2AD00B69C53 /* sc_muladd.c in Sources */ = {isa = PBXBuildFile; fileRef = FEB15668225FB5A8009B0709 /* sc_muladd.c */; };
+		FED353E22270C2AD00B69C53 /* fe_sub.c in Sources */ = {isa = PBXBuildFile; fileRef = FEB15669225FB5A8009B0709 /* fe_sub.c */; };
+		FED353E32270C2AD00B69C53 /* ge_sub.h in Headers */ = {isa = PBXBuildFile; fileRef = FEB1566A225FB5A8009B0709 /* ge_sub.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		FED353E42270C2AD00B69C53 /* fe_isnonzero.c in Sources */ = {isa = PBXBuildFile; fileRef = FEB1566B225FB5A8009B0709 /* fe_isnonzero.c */; };
+		FED353E52270C2AD00B69C53 /* pow225521.h in Headers */ = {isa = PBXBuildFile; fileRef = FEB1566C225FB5A8009B0709 /* pow225521.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		FED353E62270C2AD00B69C53 /* fe_add.c in Sources */ = {isa = PBXBuildFile; fileRef = FEB1566D225FB5A8009B0709 /* fe_add.c */; };
+		FED353E72270C2AD00B69C53 /* ge_add.h in Headers */ = {isa = PBXBuildFile; fileRef = FEB1566E225FB5A8009B0709 /* ge_add.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		FED353E82270C2AD00B69C53 /* ge_p1p1_to_p2.c in Sources */ = {isa = PBXBuildFile; fileRef = FEB1566F225FB5A8009B0709 /* ge_p1p1_to_p2.c */; };
+		FED353E92270C2AD00B69C53 /* fe_invert.c in Sources */ = {isa = PBXBuildFile; fileRef = FEB15670225FB5A8009B0709 /* fe_invert.c */; };
+		FED353EA2270C2AD00B69C53 /* ge_tobytes.c in Sources */ = {isa = PBXBuildFile; fileRef = FEB15671225FB5A8009B0709 /* ge_tobytes.c */; };
+		FED353EB2270C2AD00B69C53 /* ge_p2_0.c in Sources */ = {isa = PBXBuildFile; fileRef = FEB156A0225FB5A8009B0709 /* ge_p2_0.c */; };
+		FED353EC2270C2AD00B69C53 /* ge_p3_0.c in Sources */ = {isa = PBXBuildFile; fileRef = FEB156A1225FB5A8009B0709 /* ge_p3_0.c */; };
+		FED353ED2270C2AD00B69C53 /* fe_cmov.c in Sources */ = {isa = PBXBuildFile; fileRef = FEB156A2225FB5A8009B0709 /* fe_cmov.c */; };
+		FED353EE2270C2AD00B69C53 /* ge_p2_dbl.c in Sources */ = {isa = PBXBuildFile; fileRef = FEB156A3225FB5A8009B0709 /* ge_p2_dbl.c */; };
+		FED353EF2270C2AD00B69C53 /* fe_1.c in Sources */ = {isa = PBXBuildFile; fileRef = FEB156A4225FB5A8009B0709 /* fe_1.c */; };
+		FED353F02270C2AD00B69C53 /* fe_copy.c in Sources */ = {isa = PBXBuildFile; fileRef = FEB156AA225FB5A8009B0709 /* fe_copy.c */; };
+		FED353F12270C2AD00B69C53 /* sign.c in Sources */ = {isa = PBXBuildFile; fileRef = FEB156AB225FB5A8009B0709 /* sign.c */; };
+		FED353F22270C2AD00B69C53 /* d2.h in Headers */ = {isa = PBXBuildFile; fileRef = FEB156AC225FB5A8009B0709 /* d2.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		FED353F32270C2AD00B69C53 /* fe_0.c in Sources */ = {isa = PBXBuildFile; fileRef = FEB156AD225FB5A8009B0709 /* fe_0.c */; };
+		FED353F42270C2AD00B69C53 /* ge_madd.h in Headers */ = {isa = PBXBuildFile; fileRef = FEB156AE225FB5A8009B0709 /* ge_madd.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		FED353F52270C2AD00B69C53 /* ge_msub.h in Headers */ = {isa = PBXBuildFile; fileRef = FEB156AF225FB5A8009B0709 /* ge_msub.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		FED353F62270C2AD00B69C53 /* fe_tobytes.c in Sources */ = {isa = PBXBuildFile; fileRef = FEB156B0225FB5A8009B0709 /* fe_tobytes.c */; };
+		FED353F72270C2AD00B69C53 /* ge_p3_to_cached.c in Sources */ = {isa = PBXBuildFile; fileRef = FEB156B1225FB5A8009B0709 /* ge_p3_to_cached.c */; };
+		FED353F82270C2AD00B69C53 /* ge_add.c in Sources */ = {isa = PBXBuildFile; fileRef = FEB156B2225FB5A8009B0709 /* ge_add.c */; };
+		FED353F92270C2AD00B69C53 /* fe_neg.c in Sources */ = {isa = PBXBuildFile; fileRef = FEB156B3225FB5A8009B0709 /* fe_neg.c */; };
+		FED353FA2270C2AD00B69C53 /* ge_sub.c in Sources */ = {isa = PBXBuildFile; fileRef = FEB156B4225FB5A8009B0709 /* ge_sub.c */; };
+		FED353FB2270C2AD00B69C53 /* ge_scalarmult_base.c in Sources */ = {isa = PBXBuildFile; fileRef = FEB156B5225FB5A8009B0709 /* ge_scalarmult_base.c */; };
+		FED353FC2270C2AD00B69C53 /* fe.h in Headers */ = {isa = PBXBuildFile; fileRef = FEB156B6225FB5A8009B0709 /* fe.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		FED353FD2270C2AD00B69C53 /* ge_double_scalarmult.c in Sources */ = {isa = PBXBuildFile; fileRef = FEB156B7225FB5A8009B0709 /* ge_double_scalarmult.c */; };
+		FED353FE2270C2AD00B69C53 /* ge_precomp_0.c in Sources */ = {isa = PBXBuildFile; fileRef = FEB156B8225FB5A8009B0709 /* ge_precomp_0.c */; };
+		FED353FF2270C2AD00B69C53 /* fe_frombytes.c in Sources */ = {isa = PBXBuildFile; fileRef = FEB156B9225FB5A8009B0709 /* fe_frombytes.c */; };
+		FED354002270C2AD00B69C53 /* pow22523.h in Headers */ = {isa = PBXBuildFile; fileRef = FEB156BA225FB5A8009B0709 /* pow22523.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		FED354012270C2AD00B69C53 /* fe_isnegative.c in Sources */ = {isa = PBXBuildFile; fileRef = FEB156BB225FB5A8009B0709 /* fe_isnegative.c */; };
+		FED354022270C2AD00B69C53 /* ge_p2_dbl.h in Headers */ = {isa = PBXBuildFile; fileRef = FEB156BC225FB5A8009B0709 /* ge_p2_dbl.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		FED354032270C2AD00B69C53 /* d.h in Headers */ = {isa = PBXBuildFile; fileRef = FEB156BD225FB5A8009B0709 /* d.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		FED354042270C2AD00B69C53 /* ge_frombytes.c in Sources */ = {isa = PBXBuildFile; fileRef = FEB156BE225FB5A8009B0709 /* ge_frombytes.c */; };
+		FED354052270C2AD00B69C53 /* fe_sq.c in Sources */ = {isa = PBXBuildFile; fileRef = FEB156BF225FB5A8009B0709 /* fe_sq.c */; };
+		FED354062270C2AD00B69C53 /* sc.h in Headers */ = {isa = PBXBuildFile; fileRef = FEB156C0225FB5A8009B0709 /* sc.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		FED354072270C2AD00B69C53 /* ge.h in Headers */ = {isa = PBXBuildFile; fileRef = FEB156C1225FB5A8009B0709 /* ge.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		FED354082270C2AD00B69C53 /* open.c in Sources */ = {isa = PBXBuildFile; fileRef = FEB156CA225FB5A8009B0709 /* open.c */; };
+		FED354092270C2AD00B69C53 /* sc_reduce.c in Sources */ = {isa = PBXBuildFile; fileRef = FEB156CB225FB5A8009B0709 /* sc_reduce.c */; };
+		FED3540A2270C2AD00B69C53 /* ge_p1p1_to_p3.c in Sources */ = {isa = PBXBuildFile; fileRef = FEB156CC225FB5A8009B0709 /* ge_p1p1_to_p3.c */; };
+		FED3540B2270C2AD00B69C53 /* fe_mul.c in Sources */ = {isa = PBXBuildFile; fileRef = FEB156CD225FB5A8009B0709 /* fe_mul.c */; };
+		FED3540C2270C2AD00B69C53 /* base2.h in Headers */ = {isa = PBXBuildFile; fileRef = FEB156CE225FB5A8009B0709 /* base2.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		FED3540D2270C2AD00B69C53 /* base.h in Headers */ = {isa = PBXBuildFile; fileRef = FEB156CF225FB5A8009B0709 /* base.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		FED3540E2270C2AD00B69C53 /* ge_p3_to_p2.c in Sources */ = {isa = PBXBuildFile; fileRef = FEB156D0225FB5A8009B0709 /* ge_p3_to_p2.c */; };
+		FED3540F2270C2B400B69C53 /* sc_neg.c in Sources */ = {isa = PBXBuildFile; fileRef = FEB15673225FB5A8009B0709 /* sc_neg.c */; };
+		FED354102270C2B400B69C53 /* zeroize.h in Headers */ = {isa = PBXBuildFile; fileRef = FEB15674225FB5A8009B0709 /* zeroize.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		FED354112270C2B400B69C53 /* compare.c in Sources */ = {isa = PBXBuildFile; fileRef = FEB15675225FB5A8009B0709 /* compare.c */; };
+		FED354122270C2B400B69C53 /* sc_clamp.c in Sources */ = {isa = PBXBuildFile; fileRef = FEB15676225FB5A8009B0709 /* sc_clamp.c */; };
+		FED354132270C2B400B69C53 /* fe_montx_to_edy.c in Sources */ = {isa = PBXBuildFile; fileRef = FEB15677225FB5A8009B0709 /* fe_montx_to_edy.c */; };
+		FED354142270C2B400B69C53 /* sc_cmov.c in Sources */ = {isa = PBXBuildFile; fileRef = FEB15678225FB5A8009B0709 /* sc_cmov.c */; };
+		FED354152270C2B400B69C53 /* keygen.c in Sources */ = {isa = PBXBuildFile; fileRef = FEB15679225FB5A8009B0709 /* keygen.c */; };
+		FED354162270C2B400B69C53 /* crypto_hash_sha512.h in Headers */ = {isa = PBXBuildFile; fileRef = FEB1567A225FB5A8009B0709 /* crypto_hash_sha512.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		FED354172270C2B400B69C53 /* fe_mont_rhs.c in Sources */ = {isa = PBXBuildFile; fileRef = FEB1567B225FB5A8009B0709 /* fe_mont_rhs.c */; };
+		FED354182270C2B400B69C53 /* ge_neg.c in Sources */ = {isa = PBXBuildFile; fileRef = FEB1567C225FB5A8009B0709 /* ge_neg.c */; };
+		FED354192270C2B400B69C53 /* curve_sigs.c in Sources */ = {isa = PBXBuildFile; fileRef = FEB1567D225FB5A8009B0709 /* curve_sigs.c */; };
+		FED3541A2270C2BD00B69C53 /* gen_constants.h in Headers */ = {isa = PBXBuildFile; fileRef = FEB1567F225FB5A8009B0709 /* gen_constants.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		FED3541B2270C2BD00B69C53 /* gen_x.c in Sources */ = {isa = PBXBuildFile; fileRef = FEB15680225FB5A8009B0709 /* gen_x.c */; };
+		FED3541C2270C2BD00B69C53 /* gen_eddsa.h in Headers */ = {isa = PBXBuildFile; fileRef = FEB15681225FB5A8009B0709 /* gen_eddsa.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		FED3541D2270C2BD00B69C53 /* gen_veddsa.c in Sources */ = {isa = PBXBuildFile; fileRef = FEB15682225FB5A8009B0709 /* gen_veddsa.c */; };
+		FED3541E2270C2BD00B69C53 /* gen_crypto_additions.h in Headers */ = {isa = PBXBuildFile; fileRef = FEB15683225FB5A8009B0709 /* gen_crypto_additions.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		FED3541F2270C2BD00B69C53 /* ge_p3_add.c in Sources */ = {isa = PBXBuildFile; fileRef = FEB15684225FB5A8009B0709 /* ge_p3_add.c */; };
+		FED354202270C2BD00B69C53 /* gen_labelset.c in Sources */ = {isa = PBXBuildFile; fileRef = FEB15685225FB5A8009B0709 /* gen_labelset.c */; };
+		FED354212270C2BD00B69C53 /* gen_veddsa.h in Headers */ = {isa = PBXBuildFile; fileRef = FEB15686225FB5A8009B0709 /* gen_veddsa.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		FED354222270C2BD00B69C53 /* gen_x.h in Headers */ = {isa = PBXBuildFile; fileRef = FEB15687225FB5A8009B0709 /* gen_x.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		FED354232270C2BD00B69C53 /* gen_eddsa.c in Sources */ = {isa = PBXBuildFile; fileRef = FEB15688225FB5A8009B0709 /* gen_eddsa.c */; };
+		FED354242270C2BD00B69C53 /* point_isreduced.c in Sources */ = {isa = PBXBuildFile; fileRef = FEB15689225FB5A8009B0709 /* point_isreduced.c */; };
+		FED354252270C2BD00B69C53 /* gen_labelset.h in Headers */ = {isa = PBXBuildFile; fileRef = FEB1568A225FB5A8009B0709 /* gen_labelset.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		FED354262270C2BD00B69C53 /* sc_isreduced.c in Sources */ = {isa = PBXBuildFile; fileRef = FEB1568B225FB5A8009B0709 /* sc_isreduced.c */; };
+		FED354272270C2C500B69C53 /* internal_fast_tests.h in Headers */ = {isa = PBXBuildFile; fileRef = FEB156A6225FB5A8009B0709 /* internal_fast_tests.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		FED354282270C2C500B69C53 /* internal_slow_tests.h in Headers */ = {isa = PBXBuildFile; fileRef = FEB156A7225FB5A8009B0709 /* internal_slow_tests.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		FED354292270C2C500B69C53 /* internal_slow_tests.c in Sources */ = {isa = PBXBuildFile; fileRef = FEB156A8225FB5A8009B0709 /* internal_slow_tests.c */; };
+		FED3542A2270C2C500B69C53 /* internal_fast_tests.c in Sources */ = {isa = PBXBuildFile; fileRef = FEB156A9225FB5A8009B0709 /* internal_fast_tests.c */; };
+		FED3542B2270C2CC00B69C53 /* crypto_uint32.h in Headers */ = {isa = PBXBuildFile; fileRef = FEB156C3225FB5A8009B0709 /* crypto_uint32.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		FED3542C2270C2CC00B69C53 /* crypto_int32.h in Headers */ = {isa = PBXBuildFile; fileRef = FEB156C4225FB5A8009B0709 /* crypto_int32.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		FED3542D2270C2CC00B69C53 /* crypto_sign.h in Headers */ = {isa = PBXBuildFile; fileRef = FEB156C5225FB5A8009B0709 /* crypto_sign.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		FED3542E2270C2CC00B69C53 /* crypto_verify_32.h in Headers */ = {isa = PBXBuildFile; fileRef = FEB156C6225FB5A8009B0709 /* crypto_verify_32.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		FED3542F2270C2CC00B69C53 /* crypto_int64.h in Headers */ = {isa = PBXBuildFile; fileRef = FEB156C7225FB5A8009B0709 /* crypto_int64.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		FED354302270C2CC00B69C53 /* crypto_uint64.h in Headers */ = {isa = PBXBuildFile; fileRef = FEB156C8225FB5A8009B0709 /* crypto_uint64.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		FED354312270C2CC00B69C53 /* crypto_sign_edwards25519sha512batch.h in Headers */ = {isa = PBXBuildFile; fileRef = FEB156C9225FB5A8009B0709 /* crypto_sign_edwards25519sha512batch.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		FED354322270C2D200B69C53 /* blocks.c in Sources */ = {isa = PBXBuildFile; fileRef = FEB156D2225FB5A8009B0709 /* blocks.c */; };
+		FED354332270C2D200B69C53 /* hash.c in Sources */ = {isa = PBXBuildFile; fileRef = FEB156D3225FB5A8009B0709 /* hash.c */; };
+		FED354352270C34900B69C53 /* TigaseSwiftOMEMO-Bridging-Header.h in Headers */ = {isa = PBXBuildFile; fileRef = FED354342270C34900B69C53 /* TigaseSwiftOMEMO-Bridging-Header.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		FEEF25302264897A00202B28 /* IdentityStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = FEEF252F2264897A00202B28 /* IdentityStatus.swift */; };
 		FEEF25342264D4E700202B28 /* Identity.swift in Sources */ = {isa = PBXBuildFile; fileRef = FEEF25332264D4E700202B28 /* Identity.swift */; };
 /* End PBXBuildFile section */
@@ -205,6 +386,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		FE719E5B2270C8C2007CEEC9 /* TigaseSwift.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = TigaseSwift.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		FE9CDF0A226874A8001039C3 /* SignalError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignalError.swift; sourceTree = "<group>"; };
 		FE9CDF0E226F33C8001039C3 /* LICENSE */ = {isa = PBXFileReference; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
 		FEB1561F225FB467009B0709 /* TigaseSwiftOMEMO.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = TigaseSwiftOMEMO.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -389,6 +571,10 @@
 		FEB156E2225FB5A8009B0709 /* SignalSessionBuilder.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SignalSessionBuilder.swift; sourceTree = "<group>"; };
 		FEB156E3225FB5A8009B0709 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		FEB1584C225FB702009B0709 /* TigaseSwift.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = TigaseSwift.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		FED3537A2270BC7500B69C53 /* TigaseSwiftOMEMO.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = TigaseSwiftOMEMO.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		FED3537C2270BC7600B69C53 /* TigaseSwift_OMEMO_iOS.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TigaseSwift_OMEMO_iOS.h; sourceTree = "<group>"; };
+		FED3537D2270BC7600B69C53 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		FED354342270C34900B69C53 /* TigaseSwiftOMEMO-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "TigaseSwiftOMEMO-Bridging-Header.h"; sourceTree = "<group>"; };
 		FEEF252F2264897A00202B28 /* IdentityStatus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IdentityStatus.swift; sourceTree = "<group>"; };
 		FEEF25332264D4E700202B28 /* Identity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Identity.swift; sourceTree = "<group>"; };
 		FEF5C338225FC27600889863 /* TigaseSwiftOMEMO-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "TigaseSwiftOMEMO-Bridging-Header.h"; sourceTree = "<group>"; };
@@ -403,6 +589,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		FED353772270BC7500B69C53 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				FE719E5C2270C8C2007CEEC9 /* TigaseSwift.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -412,6 +606,7 @@
 				FE9CDF0E226F33C8001039C3 /* LICENSE */,
 				FEB15627225FB5A8009B0709 /* SharedCode */,
 				FEB15620225FB467009B0709 /* TigaseSwift OMEMO macOS */,
+				FED3537B2270BC7600B69C53 /* TigaseSwift OMEMO iOS */,
 				FE02DB9E2259E3B500FA08EB /* Products */,
 				FE02DBAC2259E52400FA08EB /* Frameworks */,
 			);
@@ -421,6 +616,7 @@
 			isa = PBXGroup;
 			children = (
 				FEB1561F225FB467009B0709 /* TigaseSwiftOMEMO.framework */,
+				FED3537A2270BC7500B69C53 /* TigaseSwiftOMEMO.framework */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -428,6 +624,7 @@
 		FE02DBAC2259E52400FA08EB /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				FE719E5B2270C8C2007CEEC9 /* TigaseSwift.framework */,
 				FEB1584C225FB702009B0709 /* TigaseSwift.framework */,
 			);
 			name = Frameworks;
@@ -703,6 +900,16 @@
 			path = nacl_sha512;
 			sourceTree = "<group>";
 		};
+		FED3537B2270BC7600B69C53 /* TigaseSwift OMEMO iOS */ = {
+			isa = PBXGroup;
+			children = (
+				FED3537C2270BC7600B69C53 /* TigaseSwift_OMEMO_iOS.h */,
+				FED3537D2270BC7600B69C53 /* Info.plist */,
+				FED354342270C34900B69C53 /* TigaseSwiftOMEMO-Bridging-Header.h */,
+			);
+			path = "TigaseSwift OMEMO iOS";
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXHeadersBuildPhase section */
@@ -783,6 +990,84 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		FED353752270BC7500B69C53 /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				FED353CA2270C28F00B69C53 /* signal_protocol_types.h in Headers */,
+				FED353B22270C28A00B69C53 /* session_builder_internal.h in Headers */,
+				FED353C02270C28F00B69C53 /* WhisperTextProtocol.pb-c.h in Headers */,
+				FE719E602270CA25007CEEC9 /* xeddsa.h in Headers */,
+				FED3540D2270C2AD00B69C53 /* base.h in Headers */,
+				FE719E6C2270CA25007CEEC9 /* utility.h in Headers */,
+				FED353BF2270C28F00B69C53 /* session_builder.h in Headers */,
+				FED353B62270C28A00B69C53 /* session_state.h in Headers */,
+				FED353BD2270C28F00B69C53 /* curve.h in Headers */,
+				FED3542C2270C2CC00B69C53 /* crypto_int32.h in Headers */,
+				FED354352270C34900B69C53 /* TigaseSwiftOMEMO-Bridging-Header.h in Headers */,
+				FED354102270C2B400B69C53 /* zeroize.h in Headers */,
+				FED353A32270C28A00B69C53 /* FingerprintProtocol.pb-c.h in Headers */,
+				FED353C52270C28F00B69C53 /* LocalStorageProtocol.pb-c.h in Headers */,
+				FED353A22270C28A00B69C53 /* protocol.h in Headers */,
+				FED3542D2270C2CC00B69C53 /* crypto_sign.h in Headers */,
+				FED353E52270C2AD00B69C53 /* pow225521.h in Headers */,
+				FED3542E2270C2CC00B69C53 /* crypto_verify_32.h in Headers */,
+				FED3540C2270C2AD00B69C53 /* base2.h in Headers */,
+				FED353BB2270C28F00B69C53 /* uthash.h in Headers */,
+				FED353D42270C29200B69C53 /* key_helper.h in Headers */,
+				FED353D62270C29600B69C53 /* protobuf-c.h in Headers */,
+				FED3542F2270C2CC00B69C53 /* crypto_int64.h in Headers */,
+				FE719E6F2270CA25007CEEC9 /* crypto_additions.h in Headers */,
+				FED353F52270C2AD00B69C53 /* ge_msub.h in Headers */,
+				FED354162270C2B400B69C53 /* crypto_hash_sha512.h in Headers */,
+				FED354222270C2BD00B69C53 /* gen_x.h in Headers */,
+				FED354002270C2AD00B69C53 /* pow22523.h in Headers */,
+				FED353CE2270C29200B69C53 /* device_consistency.h in Headers */,
+				FED354062270C2AD00B69C53 /* sc.h in Headers */,
+				FED353F22270C2AD00B69C53 /* d2.h in Headers */,
+				FED353BE2270C28F00B69C53 /* session_record.h in Headers */,
+				FED3537E2270BC7600B69C53 /* TigaseSwift_OMEMO_iOS.h in Headers */,
+				FED354032270C2AD00B69C53 /* d.h in Headers */,
+				FED353B12270C28A00B69C53 /* signal_protocol_internal.h in Headers */,
+				FED354282270C2C500B69C53 /* internal_slow_tests.h in Headers */,
+				FED353D82270C29C00B69C53 /* curve25519-donna.h in Headers */,
+				FED353B52270C28A00B69C53 /* hkdf.h in Headers */,
+				FED3542B2270C2CC00B69C53 /* crypto_uint32.h in Headers */,
+				FED353C42270C28F00B69C53 /* signal_protocol.h in Headers */,
+				FED353D02270C29200B69C53 /* ratchet.h in Headers */,
+				FED353AC2270C28A00B69C53 /* utarray.h in Headers */,
+				FED3541A2270C2BD00B69C53 /* gen_constants.h in Headers */,
+				FED353E32270C2AD00B69C53 /* ge_sub.h in Headers */,
+				FED353A72270C28A00B69C53 /* group_session_builder.h in Headers */,
+				FED353CC2270C28F00B69C53 /* sender_key_state.h in Headers */,
+				FED354212270C2BD00B69C53 /* gen_veddsa.h in Headers */,
+				FED353C82270C28F00B69C53 /* sender_key_record.h in Headers */,
+				FED353D32270C29200B69C53 /* group_cipher.h in Headers */,
+				FED354272270C2C500B69C53 /* internal_fast_tests.h in Headers */,
+				FED353C92270C28F00B69C53 /* session_pre_key.h in Headers */,
+				FED354252270C2BD00B69C53 /* gen_labelset.h in Headers */,
+				FED353C62270C28F00B69C53 /* session_cipher.h in Headers */,
+				FED354312270C2CC00B69C53 /* crypto_sign_edwards25519sha512batch.h in Headers */,
+				FED3541C2270C2BD00B69C53 /* gen_eddsa.h in Headers */,
+				FED3541E2270C2BD00B69C53 /* gen_crypto_additions.h in Headers */,
+				FED353B72270C28F00B69C53 /* vpool.h in Headers */,
+				FED353E72270C2AD00B69C53 /* ge_add.h in Headers */,
+				FED353A62270C28A00B69C53 /* utlist.h in Headers */,
+				FED353D12270C29200B69C53 /* fingerprint.h in Headers */,
+				FED354302270C2CC00B69C53 /* crypto_uint64.h in Headers */,
+				FED353DC2270C2AD00B69C53 /* sqrtm1.h in Headers */,
+				FED354022270C2AD00B69C53 /* ge_p2_dbl.h in Headers */,
+				FE719E682270CA25007CEEC9 /* curve_sigs.h in Headers */,
+				FED353AD2270C28A00B69C53 /* sender_key.h in Headers */,
+				FE719E632270CA25007CEEC9 /* keygen.h in Headers */,
+				FED353FC2270C2AD00B69C53 /* fe.h in Headers */,
+				FED353F42270C2AD00B69C53 /* ge_madd.h in Headers */,
+				FED354072270C2AD00B69C53 /* ge.h in Headers */,
+				FE719E652270CA25007CEEC9 /* compare.h in Headers */,
+				FED353D22270C29200B69C53 /* signal_utarray.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXHeadersBuildPhase section */
 
 /* Begin PBXNativeTarget section */
@@ -805,6 +1090,24 @@
 			productReference = FEB1561F225FB467009B0709 /* TigaseSwiftOMEMO.framework */;
 			productType = "com.apple.product-type.framework";
 		};
+		FED353792270BC7500B69C53 /* TigaseSwift OMEMO iOS */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = FED353812270BC7600B69C53 /* Build configuration list for PBXNativeTarget "TigaseSwift OMEMO iOS" */;
+			buildPhases = (
+				FED353752270BC7500B69C53 /* Headers */,
+				FED353762270BC7500B69C53 /* Sources */,
+				FED353772270BC7500B69C53 /* Frameworks */,
+				FED353782270BC7500B69C53 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "TigaseSwift OMEMO iOS";
+			productName = "TigaseSwift OMEMO iOS";
+			productReference = FED3537A2270BC7500B69C53 /* TigaseSwiftOMEMO.framework */;
+			productType = "com.apple.product-type.framework";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -815,6 +1118,9 @@
 				TargetAttributes = {
 					FEB1561E225FB467009B0709 = {
 						CreatedOnToolsVersion = 10.2;
+					};
+					FED353792270BC7500B69C53 = {
+						CreatedOnToolsVersion = 10.2.1;
 					};
 				};
 			};
@@ -831,6 +1137,7 @@
 			projectRoot = "";
 			targets = (
 				FEB1561E225FB467009B0709 /* TigaseSwift OMEMO macOS */,
+				FED353792270BC7500B69C53 /* TigaseSwift OMEMO iOS */,
 			);
 		};
 /* End PBXProject section */
@@ -842,7 +1149,14 @@
 			files = (
 				FE9CDF0F226F33C8001039C3 /* LICENSE in Resources */,
 				FEB1582D225FB5A9009B0709 /* libsignal-protocol-c.pc.in in Resources */,
-				FEB15705225FB5A9009B0709 /* LICENSE in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		FED353782270BC7500B69C53 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				FED353CF2270C29200B69C53 /* libsignal-protocol-c.pc.in in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -962,6 +1276,122 @@
 				FEB15805225FB5A9009B0709 /* fe_sq.c in Sources */,
 				FEB15731225FB5A9009B0709 /* FingerprintProtocol.pb-c.c in Sources */,
 				FEB1583B225FB5A9009B0709 /* SignalIdentityKey.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		FED353762270BC7500B69C53 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				FED3541B2270C2BD00B69C53 /* gen_x.c in Sources */,
+				FED353E82270C2AD00B69C53 /* ge_p1p1_to_p2.c in Sources */,
+				FED3540B2270C2AD00B69C53 /* fe_mul.c in Sources */,
+				FED353FD2270C2AD00B69C53 /* ge_double_scalarmult.c in Sources */,
+				FED3541F2270C2BD00B69C53 /* ge_p3_add.c in Sources */,
+				FED353992270C27000B69C53 /* SignalAddress.swift in Sources */,
+				FED354232270C2BD00B69C53 /* gen_eddsa.c in Sources */,
+				FED353FB2270C2AD00B69C53 /* ge_scalarmult_base.c in Sources */,
+				FED353CB2270C28F00B69C53 /* session_state.c in Sources */,
+				FED353D52270C29200B69C53 /* vpool.c in Sources */,
+				FED3538A2270C26800B69C53 /* SignalPreKeyBundle.swift in Sources */,
+				FED353F32270C2AD00B69C53 /* fe_0.c in Sources */,
+				FED3539E2270C27000B69C53 /* SignalSessionBuilder.swift in Sources */,
+				FED354292270C2C500B69C53 /* internal_slow_tests.c in Sources */,
+				FE719E6B2270CA25007CEEC9 /* xeddsa.c in Sources */,
+				FED3539A2270C27000B69C53 /* SignalStorage.swift in Sources */,
+				FED354332270C2D200B69C53 /* hash.c in Sources */,
+				FED353B42270C28A00B69C53 /* sender_key_state.c in Sources */,
+				FE719E692270CA25007CEEC9 /* ge_isneutral.c in Sources */,
+				FED353982270C27000B69C53 /* SignalIdentityKey.swift in Sources */,
+				FED353C72270C28F00B69C53 /* sender_key.c in Sources */,
+				FED354182270C2B400B69C53 /* ge_neg.c in Sources */,
+				FE719E6A2270CA25007CEEC9 /* elligator.c in Sources */,
+				FED353F92270C2AD00B69C53 /* fe_neg.c in Sources */,
+				FED353EB2270C2AD00B69C53 /* ge_p2_0.c in Sources */,
+				FED354322270C2D200B69C53 /* blocks.c in Sources */,
+				FED353B02270C28A00B69C53 /* signal_protocol.c in Sources */,
+				FED353AF2270C28A00B69C53 /* LocalStorageProtocol.pb-c.c in Sources */,
+				FED354112270C2B400B69C53 /* compare.c in Sources */,
+				FED3538D2270C26800B69C53 /* SignalSessionCipher.swift in Sources */,
+				FE719E642270CA25007CEEC9 /* ge_scalarmult_cofactor.c in Sources */,
+				FED354082270C2AD00B69C53 /* open.c in Sources */,
+				FED353A42270C28A00B69C53 /* WhisperTextProtocol.pb-c.c in Sources */,
+				FED353F02270C2AD00B69C53 /* fe_copy.c in Sources */,
+				FE719E702270CA25007CEEC9 /* ge_p3_to_montx.c in Sources */,
+				FED353A12270C27000B69C53 /* SignalError.swift in Sources */,
+				FED353E92270C2AD00B69C53 /* fe_invert.c in Sources */,
+				FED354132270C2B400B69C53 /* fe_montx_to_edy.c in Sources */,
+				FED353D92270C29C00B69C53 /* curve25519-donna.c in Sources */,
+				FED353ED2270C2AD00B69C53 /* fe_cmov.c in Sources */,
+				FED353C12270C28F00B69C53 /* FingerprintProtocol.pb-c.c in Sources */,
+				FED353EC2270C2AD00B69C53 /* ge_p3_0.c in Sources */,
+				FED353E62270C2AD00B69C53 /* fe_add.c in Sources */,
+				FED353A52270C28A00B69C53 /* session_builder.c in Sources */,
+				FED353F72270C2AD00B69C53 /* ge_p3_to_cached.c in Sources */,
+				FE719E5E2270CA25007CEEC9 /* fe_isequal.c in Sources */,
+				FED353DB2270C2AD00B69C53 /* fe_sq2.c in Sources */,
+				FED353A92270C28A00B69C53 /* session_record.c in Sources */,
+				FED353E02270C2AD00B69C53 /* ge_p3_dbl.c in Sources */,
+				FED354172270C2B400B69C53 /* fe_mont_rhs.c in Sources */,
+				FED3541D2270C2BD00B69C53 /* gen_veddsa.c in Sources */,
+				FE719E5F2270CA25007CEEC9 /* ge_montx_to_p3.c in Sources */,
+				FED353E12270C2AD00B69C53 /* sc_muladd.c in Sources */,
+				FED353E22270C2AD00B69C53 /* fe_sub.c in Sources */,
+				FED3539D2270C27000B69C53 /* SignalCryptoProvider.swift in Sources */,
+				FED354262270C2BD00B69C53 /* sc_isreduced.c in Sources */,
+				FED353AE2270C28A00B69C53 /* session_cipher.c in Sources */,
+				FED353A02270C27000B69C53 /* Identity.swift in Sources */,
+				FED353AA2270C28A00B69C53 /* session_pre_key.c in Sources */,
+				FED353CD2270C28F00B69C53 /* hkdf.c in Sources */,
+				FED353FE2270C2AD00B69C53 /* ge_precomp_0.c in Sources */,
+				FED354042270C2AD00B69C53 /* ge_frombytes.c in Sources */,
+				FED353C32270C28F00B69C53 /* protocol.c in Sources */,
+				FED354012270C2AD00B69C53 /* fe_isnegative.c in Sources */,
+				FED353F62270C2AD00B69C53 /* fe_tobytes.c in Sources */,
+				FED353B82270C28F00B69C53 /* group_cipher.c in Sources */,
+				FED353EF2270C2AD00B69C53 /* fe_1.c in Sources */,
+				FED3538C2270C26800B69C53 /* SignalContext.swift in Sources */,
+				FED353E42270C2AD00B69C53 /* fe_isnonzero.c in Sources */,
+				FED354142270C2B400B69C53 /* sc_cmov.c in Sources */,
+				FED353BA2270C28F00B69C53 /* fingerprint.c in Sources */,
+				FED3540A2270C2AD00B69C53 /* ge_p1p1_to_p3.c in Sources */,
+				FED353D72270C29600B69C53 /* protobuf-c.c in Sources */,
+				FED353DF2270C2AD00B69C53 /* ge_p3_tobytes.c in Sources */,
+				FED3540E2270C2AD00B69C53 /* ge_p3_to_p2.c in Sources */,
+				FED3538B2270C26800B69C53 /* SignalIdentityKeyPair.swift in Sources */,
+				FED354052270C2AD00B69C53 /* fe_sq.c in Sources */,
+				FED353A82270C28A00B69C53 /* curve.c in Sources */,
+				FED354192270C2B400B69C53 /* curve_sigs.c in Sources */,
+				FED353FA2270C2AD00B69C53 /* ge_sub.c in Sources */,
+				FED353F82270C2AD00B69C53 /* ge_add.c in Sources */,
+				FED354092270C2AD00B69C53 /* sc_reduce.c in Sources */,
+				FED3539F2270C27000B69C53 /* IdentityStatus.swift in Sources */,
+				FED3539C2270C27000B69C53 /* OMEMOModule.swift in Sources */,
+				FED353B32270C28A00B69C53 /* device_consistency.c in Sources */,
+				FE719E5D2270CA25007CEEC9 /* utility.c in Sources */,
+				FE719E662270CA25007CEEC9 /* zeroize.c in Sources */,
+				FED3540F2270C2B400B69C53 /* sc_neg.c in Sources */,
+				FED353BC2270C28F00B69C53 /* ratchet.c in Sources */,
+				FED354122270C2B400B69C53 /* sc_clamp.c in Sources */,
+				FED354202270C2BD00B69C53 /* gen_labelset.c in Sources */,
+				FE719E672270CA25007CEEC9 /* fe_sqrt.c in Sources */,
+				FED353FF2270C2AD00B69C53 /* fe_frombytes.c in Sources */,
+				FED353AB2270C28A00B69C53 /* sender_key_record.c in Sources */,
+				FED353DD2270C2AD00B69C53 /* fe_pow22523.c in Sources */,
+				FED354242270C2BD00B69C53 /* point_isreduced.c in Sources */,
+				FE719E6D2270CA25007CEEC9 /* open_modified.c in Sources */,
+				FED3542A2270C2C500B69C53 /* internal_fast_tests.c in Sources */,
+				FED353C22270C28F00B69C53 /* group_session_builder.c in Sources */,
+				FE719E622270CA25007CEEC9 /* ge_scalarmult.c in Sources */,
+				FED353DA2270C2AD00B69C53 /* ge_msub.c in Sources */,
+				FED353B92270C28F00B69C53 /* key_helper.c in Sources */,
+				FE719E6E2270CA25007CEEC9 /* fe_isreduced.c in Sources */,
+				FED353EA2270C2AD00B69C53 /* ge_tobytes.c in Sources */,
+				FED353EE2270C2AD00B69C53 /* ge_p2_dbl.c in Sources */,
+				FED353F12270C2AD00B69C53 /* sign.c in Sources */,
+				FED353DE2270C2AD00B69C53 /* ge_madd.c in Sources */,
+				FE719E612270CA25007CEEC9 /* sign_modified.c in Sources */,
+				FED354152270C2B400B69C53 /* keygen.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1163,6 +1593,171 @@
 			};
 			name = Release;
 		};
+		FED3537F2270BC7600B69C53 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEFINES_MODULE = YES;
+				DEVELOPMENT_TEAM = YBEYW6E35C;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				FRAMEWORK_SEARCH_PATHS = "$(PROJECT_DIR)/TigaseSwift\\ OMEMO\\ iOS";
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = "$(SDK_DIR)/usr/include/libxml2/**";
+				INFOPLIST_FILE = "TigaseSwift OMEMO iOS/Info.plist";
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = "tigase.TigaseSwift-OMEMO";
+				PRODUCT_NAME = "${PROJECT_NAME}";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OBJC_BRIDGING_HEADER = "$(SRCROOT)/TigaseSwift OMEMO iOS/TigaseSwift_OMEMO_iOS.h";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALID_ARCHS = "arm64 arm64e armv7 armv7s x86_64 i386";
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Debug;
+		};
+		FED353802270BC7600B69C53 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEFINES_MODULE = YES;
+				DEVELOPMENT_TEAM = YBEYW6E35C;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				FRAMEWORK_SEARCH_PATHS = "$(PROJECT_DIR)/TigaseSwift\\ OMEMO\\ iOS";
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = "$(SDK_DIR)/usr/include/libxml2/**";
+				INFOPLIST_FILE = "TigaseSwift OMEMO iOS/Info.plist";
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = "tigase.TigaseSwift-OMEMO";
+				PRODUCT_NAME = "${PROJECT_NAME}";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OBJC_BRIDGING_HEADER = "$(SRCROOT)/TigaseSwift OMEMO iOS/TigaseSwift_OMEMO_iOS.h";
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+				VALID_ARCHS = "arm64 arm64e armv7 armv7s x86_64 i386";
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -1180,6 +1775,15 @@
 			buildConfigurations = (
 				FEB15625225FB467009B0709 /* Debug */,
 				FEB15626225FB467009B0709 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		FED353812270BC7600B69C53 /* Build configuration list for PBXNativeTarget "TigaseSwift OMEMO iOS" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				FED3537F2270BC7600B69C53 /* Debug */,
+				FED353802270BC7600B69C53 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

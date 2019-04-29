@@ -21,7 +21,16 @@
 
 import Foundation
 
-open class SignalAddress {
+open class SignalAddress: Hashable {
+    
+    public static func == (lhs: SignalAddress, rhs: SignalAddress) -> Bool {
+        return lhs.name == rhs.name && lhs.deviceId == rhs.deviceId;
+    }
+    
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(name);
+        hasher.combine(deviceId);
+    }
     
     public let name: String;
     public let deviceId: Int32;

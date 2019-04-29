@@ -279,10 +279,13 @@ open class OMEMOModule: AbstractPEPModule {
         header.setAttribute("sid", value: String(signalContext.storage.identityKeyStore.localRegistrationId()));
         encryptedEl.addChild(header);
         
-        let localDevices = storage.sessionStore.allDevices(for: context.sessionObject.userBareJid!.stringValue, activeAndTrusted: true);
-        header.addChildren(Set(localDevices + remoteDevices).map({ (deviceId) -> SignalAddress in
+        let localAddresses = storage.sessionStore.allDevices(for: context.sessionObject.userBareJid!.stringValue, activeAndTrusted: true).map({ (deviceId) -> SignalAddress in
+            return SignalAddress(name: self.context.sessionObject.userBareJid!.stringValue, deviceId: deviceId);
+        });
+        let destinations: Set<SignalAddress> = Set(remoteDevices.map({ (deviceId) -> SignalAddress in
             return SignalAddress(name: message.to!.bareJid.stringValue, deviceId: deviceId);
-            }).map({ (addr) -> Result<SignalSessionCipher.Key,SignalError> in
+        }) + localAddresses);
+        header.addChildren(destinations.map({ (addr) -> Result<SignalSessionCipher.Key,SignalError> in
                 // TODO: maybe we should cache this session?
                 guard let session = SignalSessionCipher(withAddress: addr, andContext: self.signalContext) else {
                     return .failure(.noMemory);

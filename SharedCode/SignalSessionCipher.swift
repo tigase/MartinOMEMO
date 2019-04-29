@@ -53,8 +53,9 @@ open class SignalSessionCipher {
         let serialized = ciphertext_message_get_serialized(message);
         let result = Data(bytes: signal_buffer_data(serialized), count: signal_buffer_len(serialized));
         
-        signal_type_unref(message);
-        
+        defer {
+            signal_type_unref(message);
+        }
         return .success(Key(key: result, deviceId: address.deviceId, prekey: ciphertext_message_get_type(message) == CIPHERTEXT_PREKEY_TYPE));
     }
  
