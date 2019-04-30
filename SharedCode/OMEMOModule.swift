@@ -395,7 +395,7 @@ open class OMEMOModule: AbstractPEPModule {
         
             if changed {
                 let publishOptions = JabberDataElement(type: .submit);
-                publishOptions.addField(TextSingleField(name: "pubsub#access_mode", value: "open"));
+                publishOptions.addField(TextSingleField(name: "pubsub#access_model", value: "open"));
                 pubsubModule.publishItem(at: jid, to: OMEMOModule.DEVICES_LIST_NODE, itemId: "current", payload: listEl!, publishOptions: publishOptions, onSuccess: { (stanza, node, itemId) in
                     print("device id:", ourDeviceIdStr, " successfully registered!");
                 }, onError: { (errorCondition, pubsubError) in
@@ -568,7 +568,7 @@ open class OMEMOModule: AbstractPEPModule {
         bundleEl.addChild(Element(name: "prekeys", children: preKeysElems));
         
         let publishOptions = JabberDataElement(type: .submit);
-        publishOptions.addField(TextSingleField(name: "pubsub#access_mode", value: "open"));
+        publishOptions.addField(TextSingleField(name: "pubsub#access_model", value: "open"));
         
         let pubsubModule: PubSubModule = context.modulesManager.getModule(PubSubModule.ID)!;
         pubsubModule.publishItem(at: nil, to: bundleNode(for: storage.identityKeyStore.localRegistrationId()), itemId: "current", payload: bundleEl, publishOptions: publishOptions, onSuccess: { (stanza, node, itemId) in
