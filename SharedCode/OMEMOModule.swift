@@ -30,6 +30,9 @@ open class OMEMOModule: AbstractPEPModule {
     
     public let id: String = ID;
 
+    // Default body to set for OMEMO encrypted messages
+    open var defaultBody: String? = "I sent you an OMEMO encrypted message but your client doesn’t seem to support that.";
+    
     open var context: Context! {
         didSet {
             if oldValue != nil {
@@ -190,7 +193,7 @@ open class OMEMOModule: AbstractPEPModule {
         }
     }
     
-    public func send(message: Message, completionHandler: @escaping (EncryptionResult<Message, SignalError>)->Void) -> Bool {
+    public func send(message: Message, withStoreHint: Bool = true, completionHandler: @escaping (EncryptionResult<Message, SignalError>)->Void) -> Bool {
         guard let jid = message.to?.bareJid else {
             return false;
         }
@@ -232,6 +235,10 @@ open class OMEMOModule: AbstractPEPModule {
         
         switch result {
         case .successMessage(let encodedMessage, let fingerprint):
+            encodedMessage.body = self.defaultBody;
+            if withStoreHint {
+                encodedMessage.addChild(Element(name: "store", xmlns: "urn:xmpp:hints"));
+            }
             context.writer?.write(encodedMessage);
         default:
             break;
