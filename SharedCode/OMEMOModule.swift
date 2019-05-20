@@ -51,6 +51,7 @@ open class OMEMOModule: AbstractPEPModule {
     public let engine: AES_GCM_Engine;
     public let signalContext: SignalContext;
     public let storage: SignalStorage;
+    fileprivate let devicesQueue: DispatchQueue = DispatchQueue(label: "omemo_devices_dispatch_queue");
     fileprivate var devices: [BareJID: [Int32]] = [:];
     fileprivate var devicesFetchError: [BareJID: [Int32]] = [:];
 
@@ -59,7 +60,7 @@ open class OMEMOModule: AbstractPEPModule {
     }
     
     public func isAvailable(for jid: BareJID) -> Bool {
-        return (!(self.devices[jid]?.isEmpty ?? true)) || !self.storage.sessionStore.allDevices(for: jid.stringValue, activeAndTrusted: true).isEmpty;
+        return (!(self.devicesQueue.sync(execute: { self.devices[jid] })?.isEmpty ?? true)) || !self.storage.sessionStore.allDevices(for: jid.stringValue, activeAndTrusted: true).isEmpty;
     }
     
     public init(aesGCMEngine: AES_GCM_Engine, signalContext: SignalContext, signalStorage: SignalStorage) {
@@ -79,7 +80,7 @@ open class OMEMOModule: AbstractPEPModule {
     }
     
     public func devices(for jid: BareJID) -> [Int32]? {
-        guard let devices = self.devices[jid] else {
+        guard let devices = self.devicesQueue.sync(execute: { self.devices[jid] }) else {
             return nil;
         }
         guard let failed = self.devicesFetchError[jid] else {
@@ -446,8 +447,10 @@ open class OMEMOModule: AbstractPEPModule {
                 }
             }
         }
-        self.devices[jid] = knownActiveDevices;
-        context.eventBus.fire(AvailabilityChangedEvent(sessionObject: context.sessionObject, jid: jid));
+        self.devicesQueue.async {
+            self.devices[jid] = knownActiveDevices;
+            self.context.eventBus.fire(AvailabilityChangedEvent(sessionObject: self.context.sessionObject, jid: jid));
+        }
     }
 
     func publishDeviceBundleIfNeeded(completionHandler: @escaping ()->Void) {
