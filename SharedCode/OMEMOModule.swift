@@ -408,6 +408,25 @@ open class OMEMOModule: AbstractPEPModule {
                     print("device id:", ourDeviceIdStr, " successfully registered!");
                 }, onError: { (errorCondition, pubsubError) in
                     print("item registration failed!");
+                    if errorCondition == ErrorCondition.conflict {
+                        pubsubModule.retrieveNodeConfiguration(from: jid, node: OMEMOModule.DEVICES_LIST_NODE, onSuccess: { (stanza, form) in
+                            guard let field: ListSingleField = form.getField(named: "pubsub#access_model") else {
+                                return;
+                            }
+                            field.value = "open";
+                            pubsubModule.configureNode(at: jid, node: OMEMOModule.DEVICES_LIST_NODE, with: form, onSuccess: { (stanza) in
+                                pubsubModule.publishItem(at: jid, to: OMEMOModule.DEVICES_LIST_NODE, itemId: "current", payload: listEl!, publishOptions: publishOptions, onSuccess: { (stanza, node, itemId) in
+                                    print("device id:", ourDeviceIdStr, " successfully registered 2!");
+                                }, onError: { (errorCondition, pubsubError) in
+                                    print("item registration failed 2!");
+                                });
+                            }, onError: { (error, pubsubError) in
+                                print("node reconfiguration failed!");
+                            })
+                        }, onError: { (error, pubsubError) in
+                            print("node configuration retrieval failed!");
+                        });
+                    }
                 });
             } else {
                 context.sessionObject.setProperty(OMEMOModule.DEVICES_LIST_NODE, value: true);
