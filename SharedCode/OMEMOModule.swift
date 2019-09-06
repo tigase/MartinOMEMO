@@ -338,6 +338,7 @@ open class OMEMOModule: AbstractPEPModule {
             }
         case let nre as PubSubModule.NotificationReceivedEvent:
             if nre.nodeName == OMEMOModule.DEVICES_LIST_NODE, let from = nre.message?.from?.bareJid {
+                print("got notification from \(from) and id \(nre.itemId)");
                 checkAndPublishDevicesListIfNeeded(jid: from, list: nre.payload);
                 return;
             }
@@ -351,7 +352,7 @@ open class OMEMOModule: AbstractPEPModule {
             return;
         }
         let pepJid = context.sessionObject.userBareJid!;
-        pubsubModule.retrieveItems(from: pepJid, for: OMEMOModule.DEVICES_LIST_NODE, itemIds: ["current"], onSuccess: { (stanza, node, items, rsm) in
+        pubsubModule.retrieveItems(from: pepJid, for: OMEMOModule.DEVICES_LIST_NODE, lastItems: 1, onSuccess: { (stanza, node, items, rsm) in
             print("got published devices:", items.first as Any);
             self.checkAndPublishDevicesListIfNeeded(jid: pepJid, list: items.first?.payload, removeDevicesWithIds: removeDevicesWithIds);
         }, onError: { (errorCondition, pubsubError) in
@@ -608,7 +609,7 @@ open class OMEMOModule: AbstractPEPModule {
         })
     }
     
-    open func buildSession(forAddress address: SignalAddress, completionHandler: (()->Void)? = nil) {
+    open func buildSession(forAddress address: SignalAddress, retryNo: Int = 0, completionHandler: (()->Void)? = nil) {
         let pepJid = BareJID(address.name);
         let pubsubModule: PubSubModule = context.modulesManager.getModule(PubSubModule.ID)!;
         pubsubModule.retrieveItems(from: pepJid, for: bundleNode(for: UInt32(bitPattern: address.deviceId)), lastItems: 1, onSuccess: { (stanza, node, items, rsm) in
@@ -636,8 +637,14 @@ open class OMEMOModule: AbstractPEPModule {
             }
             completionHandler?();
         }, onError: { (errorCondition, pubsubError) in
-            self.markDeviceAsFailed(for: pepJid, andDeviceId: address.deviceId);
-            completionHandler?();
+            if errorCondition != nil && errorCondition! == .item_not_found && retryNo < 5 {
+                DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 1.0, execute: {
+                    self.buildSession(forAddress: address, retryNo: retryNo + 1, completionHandler: completionHandler);
+                })
+            } else {
+                self.markDeviceAsFailed(for: pepJid, andDeviceId: address.deviceId);
+                completionHandler?();
+            }
         });
     }
     

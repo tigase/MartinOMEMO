@@ -21,7 +21,7 @@
 
 import Foundation
 
-open class SignalAddress: Hashable {
+open class SignalAddress: Hashable, CustomStringConvertible {
     
     public static func == (lhs: SignalAddress, rhs: SignalAddress) -> Bool {
         return lhs.name == rhs.name && lhs.deviceId == rhs.deviceId;
@@ -37,6 +37,10 @@ open class SignalAddress: Hashable {
     
     fileprivate let nameBytes: UnsafeMutablePointer<Int8>;
     public let address: UnsafeMutablePointer<signal_protocol_address>;
+    
+    public var description: String {
+        return "(name: \(name), deviceId: \(deviceId) or \(UInt32(bitPattern: deviceId))";
+    }
     
     public init(name: String, deviceId: Int32) {
         self.name = name;
