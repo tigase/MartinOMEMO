@@ -199,7 +199,31 @@ open class OMEMOModule: AbstractPEPModule {
             return false;
         }
         
-        let allDevices = devices(for: jid) ?? [];
+        guard let allDevices = devices(for: jid) else {
+            guard let pubsubModule: PubSubModule = context.modulesManager.getModule(PubSubModule.ID) else {
+                completionHandler(.failure(.noSession));
+                return true;
+            }
+            // if we do not have devices we should try to retrieve them...
+            pubsubModule.retrieveItems(from: jid, for: OMEMOModule.DEVICES_LIST_NODE, lastItems: 1, onSuccess: { (stanza, node, items, rsm) in
+                print("got published devices from:", jid, ", ", items.first as Any);
+                self.checkAndPublishDevicesListIfNeeded(jid: jid, list: items.first?.payload, removeDevicesWithIds: []);
+                DispatchQueue.main.async {
+                    _ = self.send(message: message, withStoreHint: withStoreHint, completionHandler: completionHandler);
+                }
+            }, onError: { (errorCondition, pubsubError) in
+                self.devicesQueue.sync {
+                    if self.devices[jid] == nil {
+                        self.devices[jid] = [];
+                    }
+                }
+                DispatchQueue.main.async {
+                    _ = self.send(message: message, withStoreHint: withStoreHint, completionHandler: completionHandler);
+                }
+            });
+
+            return false;
+        }
         let addressesWithoutSession = allDevices.map({ deviceId -> SignalAddress in
             return SignalAddress(name: jid.stringValue, deviceId: deviceId);
         }).filter({ address -> Bool in
