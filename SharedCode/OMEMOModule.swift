@@ -194,22 +194,23 @@ open class OMEMOModule: AbstractPEPModule {
         }
     }
     
-    public func send(message: Message, withStoreHint: Bool = true, completionHandler: @escaping (EncryptionResult<Message, SignalError>)->Void) -> Bool {
+    public func encode(message: Message, withStoreHint: Bool = true, completionHandler: @escaping (EncryptionResult<Message, SignalError>)->Void) {
         guard let jid = message.to?.bareJid else {
-            return false;
+            completionHandler(.failure(.noDestination));
+            return;
         }
         
         guard let allDevices = devices(for: jid) else {
             guard let pubsubModule: PubSubModule = context.modulesManager.getModule(PubSubModule.ID) else {
                 completionHandler(.failure(.noSession));
-                return true;
+                return;
             }
             // if we do not have devices we should try to retrieve them...
             pubsubModule.retrieveItems(from: jid, for: OMEMOModule.DEVICES_LIST_NODE, lastItems: 1, onSuccess: { (stanza, node, items, rsm) in
                 print("got published devices from:", jid, ", ", items.first as Any);
                 self.checkAndPublishDevicesListIfNeeded(jid: jid, list: items.first?.payload, removeDevicesWithIds: []);
                 DispatchQueue.main.async {
-                    _ = self.send(message: message, withStoreHint: withStoreHint, completionHandler: completionHandler);
+                    self.encode(message: message, withStoreHint: withStoreHint, completionHandler: completionHandler);
                 }
             }, onError: { (errorCondition, pubsubError) in
                 self.devicesQueue.sync {
@@ -218,17 +219,23 @@ open class OMEMOModule: AbstractPEPModule {
                     }
                 }
                 DispatchQueue.main.async {
-                    _ = self.send(message: message, withStoreHint: withStoreHint, completionHandler: completionHandler);
+                    self.encode(message: message, withStoreHint: withStoreHint, completionHandler: completionHandler);
                 }
             });
 
-            return false;
+            return;
         }
         let addressesWithoutSession = allDevices.map({ deviceId -> SignalAddress in
             return SignalAddress(name: jid.stringValue, deviceId: deviceId);
         }).filter({ address -> Bool in
             return !self.storage.sessionStore.containsSessionRecord(forAddress: address);
         });
+//        guard 1 != 1 else {
+//            DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 70.0) {
+//                completionHandler(.failure(.noSession));
+//            }
+//            return;
+//        }
 
         guard addressesWithoutSession.isEmpty else {
 //            let undecidedDevices = self.storage.identityKeyStore.identities(forName: jid.stringValue).filter { (identity) -> Bool in
@@ -243,9 +250,7 @@ open class OMEMOModule: AbstractPEPModule {
                     guard counter <= 0 else {
                         return;
                     }
-                    guard self.send(message: message, completionHandler: completionHandler) else {
-                        return;
-                    }
+                    self.encode(message: message, completionHandler: completionHandler);
                 }
             }
             addressesWithoutSession.forEach { (address) in
@@ -253,10 +258,10 @@ open class OMEMOModule: AbstractPEPModule {
                 self.buildSession(forAddress: address, completionHandler: buildCompletionHandler);
             }
             
-            return false;
+            return;
         }
-        
-        let result = self.encode(message: message);
+
+        let result = self._encode(message: message);
         
         switch result {
         case .successMessage(let encodedMessage, let fingerprint):
@@ -264,16 +269,14 @@ open class OMEMOModule: AbstractPEPModule {
             if withStoreHint {
                 encodedMessage.addChild(Element(name: "store", xmlns: "urn:xmpp:hints"));
             }
-            context.writer?.write(encodedMessage);
         default:
             break;
         }
         
         completionHandler(result);
-        return true;
     }
     
-    public func encode(message: Message) -> EncryptionResult<Message,SignalError> {
+    private func _encode(message: Message) -> EncryptionResult<Message,SignalError> {
         let remoteDevices = storage.sessionStore.allDevices(for: message.to!.bareJid.stringValue, activeAndTrusted: true);
         let allRemoteDevices = storage.sessionStore.allDevices(for: message.to!.bareJid.stringValue, activeAndTrusted: false);
         guard !remoteDevices.isEmpty else {
