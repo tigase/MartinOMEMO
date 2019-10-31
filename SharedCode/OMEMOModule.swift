@@ -111,6 +111,9 @@ open class OMEMOModule: AbstractPEPModule {
         guard let keyEl = headerEl.findChild(where: { (el) -> Bool in
             return el.name == "key" && el.getAttribute("rid") == String(signalContext.storage.identityKeyStore.localRegistrationId());
         }) else {
+            guard context.sessionObject.userBareJid! != from || sid != signalContext.storage.identityKeyStore.localRegistrationId() else {
+                return .failure(.duplicateMessage);
+            }
             return .failure(.invalidMessage);
         }
         
