@@ -289,9 +289,9 @@ open class OMEMOModule: AbstractPEPModule {
      
         let body = message.body!;
 
-        var iv = Data(count: 16);
+        var iv = Data(count: 12);
         iv.withUnsafeMutableBytes { (bytes) -> Void in
-            SecRandomCopyBytes(kSecRandomDefault, 16, bytes.baseAddress!);
+            SecRandomCopyBytes(kSecRandomDefault, 12, bytes.baseAddress!);
         }
 
         var key = Data(count: 16);
