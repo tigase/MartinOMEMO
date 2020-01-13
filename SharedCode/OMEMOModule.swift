@@ -190,7 +190,12 @@ open class OMEMOModule: AbstractPEPModule {
                 return .failure(.invalidMac);
             }
             
-            message.body = String(data: decoded, encoding: .utf8);
+            let body = String(data: decoded, encoding: .utf8);
+            message.body = body;
+            
+            if let content = body, content.starts(with: "aesgcm://"), let urlComponents = URLComponents(string: content) {
+                message.oob = content;
+            }
 
             _ = storage.identityKeyStore.setStatus(active: true, forIdentity: address);
             return .successMessage(message, fingerprint: storage.identityKeyStore.identityFingerprint(forAddress: address));
@@ -277,6 +282,77 @@ open class OMEMOModule: AbstractPEPModule {
         }
         
         completionHandler(result);
+    }
+    
+    public func decryptFile(url localUrl: URL, fragment: String) -> Result<Data,ErrorCondition> {
+        guard let data = try? Data(contentsOf: localUrl) else {
+            return .failure(ErrorCondition.item_not_found);
+        }
+
+        return decryptFile(data: data, fragment: fragment);
+    }
+    
+    public func decryptFile(data inData: Data, fragment: String) -> Result<Data,ErrorCondition> {
+        guard fragment.count % 2 == 0, inData.count > 32 else {
+            return .failure(.not_acceptable);
+        }
+        
+        let fragmentData = fragment.map { (c) -> UInt8 in
+            return UInt8(c.hexDigitValue ?? 0);
+        };
+
+        let ivLen = fragmentData.count - (32 * 2);
+        
+        var iv = Data();
+        var key = Data();
+        
+        for i in 0..<(ivLen/2) {
+            iv.append(fragmentData[i*2]*16 + fragmentData[i*2+1]);
+        }
+        for i in (ivLen/2)..<(fragmentData.count/2) {
+            key.append(fragmentData[i*2]*16 + fragmentData[i*2+1]);
+        }
+        
+        let tag = inData.subdata(in: inData.count-16..<inData.count);
+        let encodedData = inData.subdata(in: 0..<(inData.count-16));
+        var decoded = Data();
+        
+        guard engine.decrypt(iv: iv, key: key, encoded: encodedData, auth: tag, output: &decoded) else {
+            return .failure(.not_acceptable);
+        }
+        
+        return .success(decoded);
+    }
+    
+    public func encryptFile(url: URL) -> Result<(Data, String),ErrorCondition> {
+        guard let data = try? Data(contentsOf: url) else {
+            return .failure(ErrorCondition.item_not_found);
+        }
+
+        return encryptFile(data: data);
+    }
+    
+    public func encryptFile(data: Data) -> Result<(Data, String),ErrorCondition> {
+        var iv = Data(count: 12);
+        iv.withUnsafeMutableBytes { (bytes) -> Void in
+            SecRandomCopyBytes(kSecRandomDefault, 12, bytes.baseAddress!);
+        }
+
+        var key = Data(count: 32);
+        key.withUnsafeMutableBytes { (bytes) -> Void in
+            SecRandomCopyBytes(kSecRandomDefault, 16, bytes.baseAddress!);
+        }
+
+        var encryptedBody = Data();
+        var tag = Data();
+
+        guard engine.encrypt(iv: iv, key: key, message: data, output: &encryptedBody, tag: &tag) else {
+            return .failure(.not_acceptable);
+        }
+        
+        let combinedKey = iv + key;
+
+        return .success((encryptedBody + tag, combinedKey.map({ String(format: "%02x", $0) }).joined()));
     }
     
     private func _encode(message: Message) -> EncryptionResult<Message,SignalError> {
