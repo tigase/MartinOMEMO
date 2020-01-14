@@ -293,7 +293,7 @@ open class OMEMOModule: AbstractPEPModule {
     }
     
     public func decryptFile(data inData: Data, fragment: String) -> Result<Data,ErrorCondition> {
-        guard fragment.count % 2 == 0, inData.count > 32 else {
+        guard fragment.count % 2 == 0 && fragment.count > 64 && inData.count > 32 else {
             return .failure(.not_acceptable);
         }
         
