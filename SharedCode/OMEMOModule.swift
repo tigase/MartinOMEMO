@@ -340,7 +340,7 @@ open class OMEMOModule: AbstractPEPModule {
 
         var key = Data(count: 32);
         key.withUnsafeMutableBytes { (bytes) -> Void in
-            SecRandomCopyBytes(kSecRandomDefault, 16, bytes.baseAddress!);
+            SecRandomCopyBytes(kSecRandomDefault, 32, bytes.baseAddress!);
         }
 
         var encryptedBody = Data();
