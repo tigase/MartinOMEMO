@@ -643,7 +643,10 @@ open class OMEMOModule: AbstractPEPModule {
 //    }
 
     fileprivate func publishDeviceBundle(currentBundle: Element?, completionHandler: @escaping ()->Void) {
-        let identityPublicKey = storage.identityKeyStore.keyPair()!.publicKey!.base64EncodedString();
+        guard let identityPublicKey = storage.identityKeyStore.keyPair()?.publicKey?.base64EncodedString() else {
+            completionHandler();
+            return;
+        }
 
         var flush: Bool = currentBundle == nil;
         if !flush {
