@@ -15,8 +15,8 @@ let package = Package(
     dependencies: [
         // Dependencies declare other packages that this package depends on.
         // .package(url: /* package url */, from: "1.0.0"),
-        .package(path: "../TigaseSwift"),
-        .package(path: "../libsignal")
+        .package(name: "TigaseSwift", url: "https://github.com/tigase/tigase-swift", .branch("mix")),
+        .package(url: "https://github.com/tigase/libsignal", .branch("master"))
     ],
     targets: [
         // Targets are the basic building blocks of a package. A target can define a module or a test suite.
