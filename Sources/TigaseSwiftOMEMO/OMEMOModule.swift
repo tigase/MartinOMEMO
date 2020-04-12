@@ -109,9 +109,9 @@ open class OMEMOModule: AbstractPEPModule {
         guard let headerEl = encryptedEl.findChild(name: "header"), let sid = UInt32(headerEl.getAttribute("sid") ?? "") else {
             return .failure(.invalidArgument);
         }
-        guard let keyEl = headerEl.findChild(where: { (el) -> Bool in
+        guard headerEl.findChild(where: { (el) -> Bool in
             return el.name == "key" && el.getAttribute("rid") == String(signalContext.storage.identityKeyStore.localRegistrationId());
-        }) else {
+        }) != nil else {
             guard context.sessionObject.userBareJid! != from || sid != signalContext.storage.identityKeyStore.localRegistrationId() else {
                 return .failure(.duplicateMessage);
             }
@@ -194,7 +194,7 @@ open class OMEMOModule: AbstractPEPModule {
             let body = String(data: decoded, encoding: .utf8);
             message.body = body;
             
-            if let content = body, content.starts(with: "aesgcm://"), let urlComponents = URLComponents(string: content) {
+            if let content = body, content.starts(with: "aesgcm://"), URLComponents(string: content) != nil {
                 message.oob = content;
             }
 
@@ -273,7 +273,7 @@ open class OMEMOModule: AbstractPEPModule {
         let result = self._encode(message: message);
         
         switch result {
-        case .successMessage(let encodedMessage, let fingerprint):
+        case .successMessage(let encodedMessage, _):
             encodedMessage.body = self.defaultBody;
             if withStoreHint {
                 encodedMessage.addChild(Element(name: "store", xmlns: "urn:xmpp:hints"));
@@ -336,12 +336,12 @@ open class OMEMOModule: AbstractPEPModule {
     public func encryptFile(data: Data) -> Result<(Data, String),ErrorCondition> {
         var iv = Data(count: 12);
         iv.withUnsafeMutableBytes { (bytes) -> Void in
-            SecRandomCopyBytes(kSecRandomDefault, 12, bytes.baseAddress!);
+            _ = SecRandomCopyBytes(kSecRandomDefault, 12, bytes.baseAddress!);
         }
 
         var key = Data(count: 32);
         key.withUnsafeMutableBytes { (bytes) -> Void in
-            SecRandomCopyBytes(kSecRandomDefault, 32, bytes.baseAddress!);
+            _ = SecRandomCopyBytes(kSecRandomDefault, 32, bytes.baseAddress!);
         }
 
         var encryptedBody = Data();
@@ -368,12 +368,12 @@ open class OMEMOModule: AbstractPEPModule {
 
         var iv = Data(count: 12);
         iv.withUnsafeMutableBytes { (bytes) -> Void in
-            SecRandomCopyBytes(kSecRandomDefault, 12, bytes.baseAddress!);
+            _ = SecRandomCopyBytes(kSecRandomDefault, 12, bytes.baseAddress!);
         }
 
         var key = Data(count: 16);
         key.withUnsafeMutableBytes { (bytes) -> Void in
-            SecRandomCopyBytes(kSecRandomDefault, 16, bytes.baseAddress!);
+            _ = SecRandomCopyBytes(kSecRandomDefault, 16, bytes.baseAddress!);
         }
         
         var encryptedBody = Data();
@@ -415,7 +415,7 @@ open class OMEMOModule: AbstractPEPModule {
                         keyEl.setAttribute("prekey", value: "true");
                     }
                     return keyEl;
-                case .failure(let error):
+                case .failure(_):
                     return nil;
                 }
             }).filter({ (el) -> Bool in
@@ -436,7 +436,7 @@ open class OMEMOModule: AbstractPEPModule {
     
     public func handle(event: Event) {
         switch event {
-        case let af as DiscoveryModule.AccountFeaturesReceivedEvent:
+        case is DiscoveryModule.AccountFeaturesReceivedEvent:
             if isPepAvailable {
                 publishDeviceBundleIfNeeded() {
                     self.publishDeviceIdIfNeeded();
@@ -445,7 +445,7 @@ open class OMEMOModule: AbstractPEPModule {
             }
         case let nre as PubSubModule.NotificationReceivedEvent:
             if nre.nodeName == OMEMOModule.DEVICES_LIST_NODE, let from = nre.message?.from?.bareJid {
-                print("got notification from \(from) and id \(nre.itemId)");
+                print("got notification from \(from) and id \(nre.itemId ?? "nil")");
                 checkAndPublishDevicesListIfNeeded(jid: from, list: nre.payload);
                 return;
             }
@@ -602,7 +602,7 @@ open class OMEMOModule: AbstractPEPModule {
         }
         
         withIds.forEach { deviceId in
-            self.storage.identityKeyStore.setStatus(active: false, forIdentity: SignalAddress(name: self.context.sessionObject.userBareJid!.stringValue, deviceId: deviceId));
+            _ = self.storage.identityKeyStore.setStatus(active: false, forIdentity: SignalAddress(name: self.context.sessionObject.userBareJid!.stringValue, deviceId: deviceId));
             
             pubsubModule.deleteNode(from: pepJid, node: bundleNode(for: UInt32(bitPattern: deviceId)), callback: nil);
         }
