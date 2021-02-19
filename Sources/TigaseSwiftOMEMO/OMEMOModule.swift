@@ -29,7 +29,7 @@ extension XmppModuleIdentifier {
     }
 }
 
-open class OMEMOModule: XmppModuleBase, AbstractPEPModule {
+open class OMEMOModule: AbstractPEPModule, XmppModule {
     
     public static let ID = "omemo";
     public static let IDENTIFIER = XmppModuleIdentifier<OMEMOModule>();
@@ -41,13 +41,15 @@ open class OMEMOModule: XmppModuleBase, AbstractPEPModule {
     // Default body to set for OMEMO encrypted messages
     open var defaultBody: String? = "I sent you an OMEMO encrypted message but your client doesn’t seem to support that.";
     
-    open override weak var context: Context? {
+    public override var isPepAvailable: Bool {
         didSet {
-            if let oldValue = oldValue {
-                oldValue.eventBus.unregister(handler: self, for: PubSubModule.NotificationReceivedEvent.TYPE, DiscoveryModule.AccountFeaturesReceivedEvent.TYPE);
-            }
-            if let context = context {
-                context.eventBus.register(handler: self, for: PubSubModule.NotificationReceivedEvent.TYPE, DiscoveryModule.AccountFeaturesReceivedEvent.TYPE);
+            if isPepAvailable {
+                publishDeviceBundleIfNeeded() {
+                    self.publishDeviceIdIfNeeded();
+                    if let context = self.context {
+                        context.sessionObject.setProperty(OMEMOModule.XMLNS + ".bundle", value: true);
+                    }
+                }
             }
         }
     }
@@ -450,25 +452,14 @@ open class OMEMOModule: XmppModuleBase, AbstractPEPModule {
         return .successMessage(message, fingerprint: fingerprint);
     }
     
-    public func handle(event: Event) {
-        switch event {
-        case is DiscoveryModule.AccountFeaturesReceivedEvent:
-            if isPepAvailable {
-                publishDeviceBundleIfNeeded() {
-                    self.publishDeviceIdIfNeeded();
-                    if let context = self.context {
-                        context.sessionObject.setProperty(OMEMOModule.XMLNS + ".bundle", value: true);
-                    }
-                }
+    open override func onItemNotification(notification: PubSubModule.ItemNotification) {
+        if notification.node == OMEMOModule.DEVICES_LIST_NODE, let from = notification.message.from?.bareJid {
+            switch notification.action {
+            case .published(let item):
+                checkAndPublishDevicesListIfNeeded(jid: from, list: item.payload)
+            default:
+                break;
             }
-        case let nre as PubSubModule.NotificationReceivedEvent:
-            if nre.nodeName == OMEMOModule.DEVICES_LIST_NODE, let from = nre.message?.from?.bareJid {
-                print("got notification from \(from) and id \(nre.itemId ?? "nil")");
-                checkAndPublishDevicesListIfNeeded(jid: from, list: nre.payload);
-                return;
-            }
-        default:
-            break;
         }
     }
     
@@ -536,7 +527,7 @@ open class OMEMOModule: XmppModuleBase, AbstractPEPModule {
                 publishOptions.addField(TextSingleField(name: "pubsub#access_model", value: "open"));
                 pubsubModule.publishItem(at: jid, to: OMEMOModule.DEVICES_LIST_NODE, itemId: "current", payload: listEl!, publishOptions: publishOptions, completionHandler: { result in
                     switch result {
-                    case .success(let itemId):
+                    case .success(_):
                         print("device id:", ourDeviceIdStr, " successfully registered!");
                     case .failure(let pubsubError):
                         print("item registration failed!");
