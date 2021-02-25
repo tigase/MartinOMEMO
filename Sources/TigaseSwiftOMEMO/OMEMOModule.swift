@@ -284,7 +284,11 @@ open class OMEMOModule: AbstractPEPModule {
             case .failure(let error):
                 completionHandler(.failure(error));
             case .success(let addresses):
-                self.encode(message: message, forAddresses: addresses, withStoreHint: withStoreHint, completionHandler: completionHandler);
+                if addresses.isEmpty {
+                    completionHandler(.failure(.noSession));
+                } else {
+                    self.encode(message: message, forAddresses: addresses, withStoreHint: withStoreHint, completionHandler: completionHandler);
+                }
             }
             
         })
