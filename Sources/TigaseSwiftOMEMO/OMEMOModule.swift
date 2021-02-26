@@ -236,7 +236,7 @@ open class OMEMOModule: AbstractPEPModule {
                 }
             } else {
                 group.enter();
-                pubsubModule.retrieveItems(from: jid, for: OMEMOModule.ID, lastItems: 1, onSuccess: { (stanza, node, items, rsm) in
+                pubsubModule.retrieveItems(from: jid, for: OMEMOModule.DEVICES_LIST_NODE, lastItems: 1, onSuccess: { (stanza, node, items, rsm) in
                     print("got published devices from:", jid, ", ", items.first as Any);
                     if let listEl = items.first?.payload, listEl.name == "list" && listEl.xmlns == "eu.siacs.conversations.axolotl" {
                         let knownActiveDevices: [Int32] = listEl.mapChildren(transform: { $0.getAttribute("id") }).compactMap({ Int32($0) });
