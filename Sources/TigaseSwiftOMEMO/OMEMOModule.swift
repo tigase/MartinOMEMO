@@ -128,6 +128,9 @@ open class OMEMOModule: AbstractPEPModule, XmppModule {
             guard context.userBareJid != from || sid != signalContext.storage.identityKeyStore.localRegistrationId() else {
                 return .failure(.duplicateMessage);
             }
+            guard encryptedEl.findChild(name: "payload") != nil else {
+                return .failure(.duplicateMessage);
+            }
             return .failure(.invalidMessage);
         }
         
@@ -166,6 +169,9 @@ open class OMEMOModule: AbstractPEPModule, XmppModule {
                     return .failure(.unknown);
                 }
             } else {
+                guard encryptedEl.findChild(name: "payload") != nil else {
+                    return .failure(.duplicateMessage);
+                }
                 return .failure(.invalidMessage);
             }
         }
