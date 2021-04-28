@@ -108,13 +108,18 @@ open class OMEMOModule: AbstractPEPModule, XmppModule {
     }
     
     public func decode(message: Message) -> DecryptionResult<Message, SignalError> {
-        guard let context = context else {
-            return .failure(.unknown);
-        }
         guard let from = message.from?.bareJid else {
             return .failure(.invalidArgument);
         }
-        
+        return self.decode(message: message, from: from);
+    }
+    
+    
+    public func decode(message: Message, from: BareJID) -> DecryptionResult<Message, SignalError> {
+        guard let context = context else {
+            return .failure(.unknown);
+        }
+
         guard let encryptedEl = message.findChild(name: "encrypted", xmlns: OMEMOModule.XMLNS) else {
             return .failure(SignalError.notEncrypted);
         }
@@ -122,8 +127,11 @@ open class OMEMOModule: AbstractPEPModule, XmppModule {
         guard let headerEl = encryptedEl.findChild(name: "header"), let sid = UInt32(headerEl.getAttribute("sid") ?? "") else {
             return .failure(.invalidArgument);
         }
+        
+        let localDeviceIdStr = String(signalContext.storage.identityKeyStore.localRegistrationId());
+        
         guard headerEl.findChild(where: { (el) -> Bool in
-            return el.name == "key" && el.getAttribute("rid") == String(signalContext.storage.identityKeyStore.localRegistrationId());
+            return el.name == "key" && el.getAttribute("rid") == localDeviceIdStr;
         }) != nil else {
             guard context.userBareJid != from || sid != signalContext.storage.identityKeyStore.localRegistrationId() else {
                 return .failure(.duplicateMessage);
@@ -135,7 +143,7 @@ open class OMEMOModule: AbstractPEPModule, XmppModule {
         }
         
         let possibleKeys = headerEl.getChildren(where: { (el) -> Bool in
-            return el.name == "key" && el.getAttribute("rid") == String(signalContext.storage.identityKeyStore.localRegistrationId());
+            return el.name == "key" && el.getAttribute("rid") == localDeviceIdStr;
         }).map({ (keyEl) -> Result<(SignalAddress, Data, Bool), SignalError> in
             guard let keyElValue = keyEl.value, let key = Data(base64Encoded: keyElValue) else {
                 return .failure(.invalidArgument);
@@ -227,71 +235,92 @@ open class OMEMOModule: AbstractPEPModule, XmppModule {
             completionHandler(.failure(.noDestination));
             return;
         }
-        
-        guard let allDevices = devices(for: jid) else {
-            guard let pubsubModule: PubSubModule = context?.module(.pubsub) else {
-                completionHandler(.failure(.noSession));
-                return;
-            }
-            // if we do not have devices we should try to retrieve them...
-            pubsubModule.retrieveItems(from: jid, for: OMEMOModule.DEVICES_LIST_NODE, limit: .lastItems(1), completionHandler: { result in
-                switch result {
-                case .success(let items):
-                    print("got published devices from:", jid, ", ", items.items.first as Any);
-                    self.checkAndPublishDevicesListIfNeeded(jid: jid, list: items.items.first?.payload, removeDevicesWithIds: []);
-                    DispatchQueue.main.async {
-                        self.encode(message: message, withStoreHint: withStoreHint, completionHandler: completionHandler);
-                    }
-                case .failure(_):
-                    self.devicesQueue.sync {
-                        if self.devices[jid] == nil {
-                            self.devices[jid] = [];
+
+        encode(message: message, for: [jid], withStoreHint: withStoreHint, completionHandler: completionHandler);
+    }
+    
+    public func addresses(for jids: [BareJID], completionHandler: @escaping(Result<[SignalAddress],SignalError>)->Void) {
+        guard let pubsubModule: PubSubModule = context?.module(.pubsub) else {
+            completionHandler(.failure(.unknown));
+            return;
+        }
+        let group = DispatchGroup();
+        var addresses: [SignalAddress] = [];
+        for jid in jids {
+            if let devices = self.devices(for: jid) {
+                addresses.append(contentsOf: devices.map({ SignalAddress(name: jid.stringValue, deviceId: $0) }));
+                for address in addresses.filter({ !self.storage.sessionStore.containsSessionRecord(forAddress: $0) }) {
+                    group.enter();
+                    self.buildSession(forAddress: address, completionHandler: {
+                        group.leave();
+                    })
+                }
+            } else {
+                group.enter();
+                pubsubModule.retrieveItems(from: jid, for: OMEMOModule.DEVICES_LIST_NODE, limit: .lastItems(1), completionHandler: { result in
+                    switch result {
+                    case .success(let items):
+                        print("got published devices from:", jid, ", ", items.items.first as Any);
+                        if let listEl = items.items.first?.payload, listEl.name == "list" && listEl.xmlns == "eu.siacs.conversations.axolotl" {
+                            let knownActiveDevices: [Int32] = listEl.mapChildren(transform: { $0.getAttribute("id") }).compactMap({ Int32($0) });
+                                
+                            
+                            let allDevices = self.storage.sessionStore.allDevices(for: jid.stringValue, activeAndTrusted: true);
+                            allDevices.filter { (id) -> Bool in
+                                return !knownActiveDevices.contains(id);
+                                }.forEach { (deviceId) in
+                                    _ = self.storage.identityKeyStore.setStatus(active: false, forIdentity: SignalAddress(name: jid.stringValue, deviceId: deviceId));
+                            }
+                            
+                            knownActiveDevices.filter { (id) -> Bool in
+                                return !allDevices.contains(id);
+                                }.forEach { (deviceId) in
+                                    // TODO: we should enable this device key if we have its identity!
+                                    _ = self.storage.identityKeyStore.setStatus(active: true, forIdentity: SignalAddress(name: jid.stringValue, deviceId: deviceId));
+                            }
+                            addresses.append(contentsOf: knownActiveDevices.map({ SignalAddress(name: jid.stringValue, deviceId: $0) }));
                         }
+                        
+                        // should we start fetching sessions here? without waiting for all JIDs to return? should improve performance
+                        for address in addresses.filter({ !self.storage.sessionStore.containsSessionRecord(forAddress: $0) }) {
+                            group.enter();
+                            self.buildSession(forAddress: address, completionHandler: {
+                                group.leave();
+                            })
+                        }
+                    case .failure(_):
+                        break;
                     }
-                    DispatchQueue.main.async {
-                        self.encode(message: message, withStoreHint: withStoreHint, completionHandler: completionHandler);
-                    }
-                }
-            });
-            return;
+                    group.leave();
+                })
+            }
         }
-        let addressesWithoutSession = allDevices.map({ deviceId -> SignalAddress in
-            return SignalAddress(name: jid.stringValue, deviceId: deviceId);
-        }).filter({ address -> Bool in
-            return !self.storage.sessionStore.containsSessionRecord(forAddress: address);
-        });
-//        guard 1 != 1 else {
-//            DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 70.0) {
-//                completionHandler(.failure(.noSession));
-//            }
-//            return;
-//        }
-
-        guard addressesWithoutSession.isEmpty else {
-//            let undecidedDevices = self.storage.identityKeyStore.identities(forName: jid.stringValue).filter { (identity) -> Bool in
-//                return identity.status.trust == .undecided;
-//            };
-            
-            // TODO: we should ask user what he wants to do if identity trust is not set yet...
-            var counter = addressesWithoutSession.count;
-            let buildCompletionHandler: ()->Void = {
-                DispatchQueue.main.async {
-                    counter = counter - 1;
-                    guard counter <= 0 else {
-                        return;
-                    }
-                    self.encode(message: message, completionHandler: completionHandler);
+        group.notify(queue: DispatchQueue.main, execute: {
+            // we finished address retrieval..
+            completionHandler(.success(addresses));
+        })
+    }
+    
+    public func encode(message: Message, for jids: [BareJID], withStoreHint: Bool = true, completionHandler: @escaping (EncryptionResult<Message, SignalError>)->Void) {
+        
+        addresses(for: jids, completionHandler: { result in
+            switch result {
+            case .failure(let error):
+                completionHandler(.failure(error));
+            case .success(let addresses):
+                if addresses.isEmpty {
+                    completionHandler(.failure(.noSession));
+                } else {
+                    self.encode(message: message, forAddresses: addresses, withStoreHint: withStoreHint, completionHandler: completionHandler);
                 }
             }
-            addressesWithoutSession.forEach { (address) in
-                // try to build session if possible
-                self.buildSession(forAddress: address, completionHandler: buildCompletionHandler);
-            }
             
-            return;
-        }
+        })
+    }
+     
+    public func encode(message: Message, forAddresses addresses: [SignalAddress], withStoreHint: Bool = true, completionHandler: @escaping (EncryptionResult<Message, SignalError>)->Void) {
 
-        let result = self._encode(message: message);
+        let result = self._encode(message: message, for: addresses);
         
         switch result {
         case .successMessage(let encodedMessage, _):
@@ -377,17 +406,11 @@ open class OMEMOModule: AbstractPEPModule, XmppModule {
         return .success((encryptedBody + tag, combinedKey.map({ String(format: "%02x", $0) }).joined()));
     }
     
-    private func _encode(message: Message) -> EncryptionResult<Message,SignalError> {
-        let remoteDevices = storage.sessionStore.allDevices(for: message.to!.bareJid.stringValue, activeAndTrusted: true);
-        let allRemoteDevices = storage.sessionStore.allDevices(for: message.to!.bareJid.stringValue, activeAndTrusted: false);
-        guard let context = context else {
+    private func _encode(message: Message, for remoteAddresses: [SignalAddress]) -> EncryptionResult<Message,SignalError> {
+        guard let context = self.context else {
             return .failure(.unknown);
         }
-        guard !remoteDevices.isEmpty else {
-            print("no trusted remove devices, but we have some untrusted:", allRemoteDevices);
-            return .failure(.noSession);
-        }
-     
+        
         let body = message.body!;
 
         var iv = Data(count: 12);
@@ -421,9 +444,7 @@ open class OMEMOModule: AbstractPEPModule, XmppModule {
         let localAddresses = storage.sessionStore.allDevices(for: context.userBareJid.stringValue, activeAndTrusted: true).map({ (deviceId) -> SignalAddress in
             return SignalAddress(name: context.userBareJid.stringValue, deviceId: deviceId);
         });
-        let destinations: Set<SignalAddress> = Set(remoteDevices.map({ (deviceId) -> SignalAddress in
-            return SignalAddress(name: message.to!.bareJid.stringValue, deviceId: deviceId);
-        }) + localAddresses);
+        let destinations: Set<SignalAddress> = Set(remoteAddresses + localAddresses);
         header.addChildren(destinations.map({ (addr) -> Result<SignalSessionCipher.Key,SignalError> in
                 // TODO: maybe we should cache this session?
                 guard let session = SignalSessionCipher(withAddress: addr, andContext: self.signalContext) else {
