@@ -106,7 +106,7 @@ open class SignalStorage {
     };
 }
 
-public protocol SignalSessionStoreProtocol: class {
+public protocol SignalSessionStoreProtocol: AnyObject {
 
     func sessionRecord(forAddress address: SignalAddress) -> Data?;
  
@@ -121,7 +121,7 @@ public protocol SignalSessionStoreProtocol: class {
     func deleteAllSessions(for: String) -> Bool;
 }
 
-public protocol SignalPreKeyStoreProtocol: class {
+public protocol SignalPreKeyStoreProtocol: AnyObject {
     
     func currentPreKeyId() -> UInt32;
     
@@ -134,7 +134,7 @@ public protocol SignalPreKeyStoreProtocol: class {
     func deletePreKey(withId: UInt32) -> Bool;
 }
 
-public protocol SignalSignedPreKeyStoreProtocol: class {
+public protocol SignalSignedPreKeyStoreProtocol: AnyObject {
 
     func countSignedPreKeys() -> Int;
     
@@ -147,7 +147,7 @@ public protocol SignalSignedPreKeyStoreProtocol: class {
     func deleteSignedPreKey(withId: UInt32) -> Bool;
 }
 
-public protocol SignalIdentityKeyStoreProtocol: class {
+public protocol SignalIdentityKeyStoreProtocol: AnyObject {
     
     func keyPair() -> SignalIdentityKeyPairProtocol?;
     func localRegistrationId() -> UInt32;
@@ -164,7 +164,7 @@ public protocol SignalIdentityKeyStoreProtocol: class {
     func identityFingerprint(forAddress address: SignalAddress) -> String?
 }
 
-public protocol SignalIdentityKeyProtocol: class {
+public protocol SignalIdentityKeyProtocol: AnyObject {
     var publicKeyPointer: OpaquePointer { get }
     var publicKey: Data? { get }
     
@@ -178,7 +178,7 @@ public protocol SignalIdentityKeyPairProtocol: SignalIdentityKeyProtocol {
     var privateKey: Data? { get }
 }
 
-public protocol SignalSenderKeyStoreProtocol: class {
+public protocol SignalSenderKeyStoreProtocol: AnyObject {
     
     func storeSenderKey(_ key: Data, address: SignalAddress?, groupId: String?) -> Bool;
     func loadSenderKey(forAddress: SignalAddress?, groupId: String?) -> Data?;
