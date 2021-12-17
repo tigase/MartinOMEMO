@@ -29,7 +29,7 @@ extension XmppModuleIdentifier {
     }
 }
 
-open class OMEMOModule: AbstractPEPModule, XmppModule {
+open class OMEMOModule: AbstractPEPModule, XmppModule, Resetable {
     
     public static let ID = "omemo";
     public static let IDENTIFIER = XmppModuleIdentifier<OMEMOModule>();
@@ -64,6 +64,7 @@ open class OMEMOModule: AbstractPEPModule, XmppModule {
     fileprivate let devicesQueue: DispatchQueue = DispatchQueue(label: "omemo_devices_dispatch_queue");
     fileprivate var devices: [BareJID: [Int32]] = [:];
     fileprivate var devicesFetchError: [BareJID: [Int32]] = [:];
+    private var ownBrokenDevices: [Int32] = [];
 
     public var isReady: Bool {
         return isPepAvailable && (context?.sessionObject.getProperty(OMEMOModule.DEVICES_LIST_NODE, defValue: false) ?? false) && (context?.sessionObject.getProperty(OMEMOModule.XMLNS + ".bundle", defValue: false) ?? false);
@@ -78,6 +79,14 @@ open class OMEMOModule: AbstractPEPModule, XmppModule {
         self.storage = signalStorage;
         self.engine = aesGCMEngine;
         super.init();
+    }
+    
+    public func reset(scopes: Set<ResetableScope>) {
+        if scopes.contains(.session) {
+            self.devicesQueue.async {
+                self.devices.removeAll();
+            }
+        }
     }
     
     public func regenerateKeys(wipe: Bool = false) -> Bool {
@@ -615,6 +624,20 @@ open class OMEMOModule: AbstractPEPModule, XmppModule {
         }
         
         if me {
+            let group = DispatchGroup();
+            group.notify(queue: self.devicesQueue, execute: {
+                let brokenIds = self.ownBrokenDevices;
+                guard !brokenIds.isEmpty else {
+                    return;
+                }
+              
+                self.ownBrokenDevices.removeAll();
+                
+                print("removing own devices with ids \(brokenIds) as there are no bundles for them!")
+                self.removeDevices(withIds: brokenIds);
+            })
+            
+            group.enter();
             knownActiveDevices.forEach { (deviceId) in
                 guard deviceId != self.storage.identityKeyStore.localRegistrationId() else {
                     return;
@@ -622,9 +645,13 @@ open class OMEMOModule: AbstractPEPModule, XmppModule {
                 let address = SignalAddress(name: jid.stringValue, deviceId: deviceId);
                 if !self.storage.sessionStore.containsSessionRecord(forAddress: address) {
                     // we do not have a session, so we need to build one!
-                    self.buildSession(forAddress: address);
+                    group.enter();
+                    self.buildSession(forAddress: address, completionHandler: {
+                        group.leave();
+                    });
                 }
             }
+            group.leave();
         }
         self.devicesQueue.async {
             self.devices[jid] = knownActiveDevices;
@@ -782,7 +809,7 @@ open class OMEMOModule: AbstractPEPModule, XmppModule {
         });
     }
     
-    open func buildSession(forAddress address: SignalAddress, retryNo: Int = 0, completionHandler: (()->Void)? = nil) {
+    open func buildSession(forAddress address: SignalAddress, completionHandler: (()->Void)? = nil) {
         let pepJid = BareJID(address.name);
         guard let pubsubModule: PubSubModule = context?.module(.pubsub) else {
             return;
@@ -814,10 +841,11 @@ open class OMEMOModule: AbstractPEPModule, XmppModule {
                 }
                 completionHandler?();
             case .failure(let pubsubError):
-                if pubsubError.error == .item_not_found && retryNo < 5 {
-                    DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 1.0, execute: {
-                        self.buildSession(forAddress: address, retryNo: retryNo + 1, completionHandler: completionHandler);
-                    })
+                if let account = self.context?.userBareJid, pubsubError.error == .item_not_found, account == pepJid {
+                    // there is not bundle for local device-id
+                    self.devicesQueue.async {
+                        self.ownBrokenDevices.append(address.deviceId);
+                    }
                 } else {
                     self.markDeviceAsFailed(for: pepJid, andDeviceId: address.deviceId);
                     completionHandler?();
