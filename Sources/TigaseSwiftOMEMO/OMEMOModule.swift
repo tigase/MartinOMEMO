@@ -29,6 +29,21 @@ extension XmppModuleIdentifier {
     }
 }
 
+struct KeyDecryptionResult {
+    let result: Result<Data,SignalError>;
+    let address: SignalAddress;
+    let isPrekey: Bool;
+    
+    var isSuccess: Bool {
+        switch result {
+        case .success(_):
+            return true;
+        case .failure(_):
+            return false;
+        }
+    }
+}
+
 open class OMEMOModule: AbstractPEPModule, XmppModule, Resetable {
     
     public static let ID = "omemo";
@@ -116,15 +131,15 @@ open class OMEMOModule: AbstractPEPModule, XmppModule, Resetable {
         throw ErrorCondition.feature_not_implemented;
     }
     
-    public func decode(message: Message) -> DecryptionResult<Message, SignalError> {
+    public func decode(message: Message, serverMsgId: String? = nil) -> DecryptionResult<Message, SignalError> {
         guard let from = message.from?.bareJid else {
             return .failure(.invalidArgument);
         }
-        return self.decode(message: message, from: from);
+        return self.decode(message: message, from: from, serverMsgId: serverMsgId);
     }
     
     
-    public func decode(message: Message, from: BareJID) -> DecryptionResult<Message, SignalError> {
+    public func decode(message: Message, from: BareJID, serverMsgId: String? = nil) -> DecryptionResult<Message, SignalError> {
         guard let context = context else {
             return .failure(.unknown);
         }
@@ -153,34 +168,34 @@ open class OMEMOModule: AbstractPEPModule, XmppModule, Resetable {
         
         let possibleKeys = headerEl.getChildren(where: { (el) -> Bool in
             return el.name == "key" && el.getAttribute("rid") == localDeviceIdStr;
-        }).map({ (keyEl) -> Result<(SignalAddress, Data, Bool), SignalError> in
-            guard let keyElValue = keyEl.value, let key = Data(base64Encoded: keyElValue) else {
-                return .failure(.invalidArgument);
-            }
+        }).map({ (keyEl) -> KeyDecryptionResult in
             let prekey = "true" == keyEl.getAttribute("prekey") || keyEl.getAttribute("prekey") == "1";
             let address = SignalAddress(name: from.stringValue, deviceId: Int32(bitPattern: sid));
+            guard let keyElValue = keyEl.value, let key = Data(base64Encoded: keyElValue) else {
+                return .init(result: .failure(.invalidArgument), address: address, isPrekey: prekey);
+            }
             guard let session = SignalSessionCipher(withAddress: address, andContext: self.signalContext) else {
-                return .failure(SignalError.noMemory);
+                return .init(result: .failure(SignalError.noMemory), address: address, isPrekey: prekey);
             }
-            switch session.decrypt(key: SignalSessionCipher.Key(key: key,deviceId: Int32(bitPattern: sid), prekey: prekey)) {
-            case .failure(let error):
-                return .failure(error);
-            case .success(let data):
-                return .success((address, data, prekey));
-            }
+            return .init(result: session.decrypt(key: SignalSessionCipher.Key(key: key,deviceId: Int32(bitPattern: sid), prekey: prekey)), address: address, isPrekey: prekey);
         });
         
-        guard let possibleKey = possibleKeys.first(where: { (result) -> Bool in
-            switch result {
-            case .failure(_):
-                return false;
-            case .success(_):
-                return true;
-            }
-        }) else {
-            if let err = possibleKeys.first {
-                switch err {
+        guard let possibleKey = possibleKeys.first(where: { $0.isSuccess }) else {
+            if let key = possibleKeys.first {
+                switch key.result {
                 case .failure(let error):
+                    switch error {
+                    case .noSession, .invalidMessage:
+                        if serverMsgId != nil {
+                            if !postponeHealing(for: message.type == .groupchat ? message.from?.bareJid : nil, address: key.address) {
+                                self.buildSession(forAddress: key.address, completionHandler: {
+                                    self.completeSession(forAddress: key.address);
+                                });
+                            }
+                        }
+                    default:
+                        break;
+                    }
                     return .failure(error);
                 case .success(_):
                     return .failure(.unknown);
@@ -193,17 +208,23 @@ open class OMEMOModule: AbstractPEPModule, XmppModule, Resetable {
             }
         }
         
-        switch possibleKey {
+        switch possibleKey.result {
         case .failure(let error):
             return .failure(error);
-        case .success(let item):
+        case .success(let data):
             message.removeChild(encryptedEl);
 
-            var (address, decodedKey, prekey) = item;
+            let address = possibleKey.address;
+            let prekey = possibleKey.isPrekey;
+            var decodedKey = data;
             
             if prekey {
                 // pre key was removed so we need to republish the bundle!
-                self.publishDeviceIdIfNeeded();
+                if !postponeSession(for: message.type == .groupchat ? message.from?.bareJid : nil, address: address) {
+                    if self.storage.preKeyStore.flushDeletedPreKeys() {
+                        self.publishDeviceBundleIfNeeded(completionHandler: nil);
+                    }
+                }
             }
 
             var auth: Data? = nil;
@@ -415,13 +436,11 @@ open class OMEMOModule: AbstractPEPModule, XmppModule, Resetable {
         return .success((encryptedBody + tag, combinedKey.map({ String(format: "%02x", $0) }).joined()));
     }
     
-    private func _encode(message: Message, for remoteAddresses: [SignalAddress]) -> EncryptionResult<Message,SignalError> {
+    private func _encode(message: Message, for remoteAddresses: [SignalAddress], forSelf: Bool = true) -> EncryptionResult<Message,SignalError> {
         guard let context = self.context else {
             return .failure(.unknown);
         }
         
-        let body = message.body!;
-
         var iv = Data(count: 12);
         iv.withUnsafeMutableBytes { (bytes) -> Void in
             _ = SecRandomCopyBytes(kSecRandomDefault, 12, bytes.baseAddress!);
@@ -432,27 +451,28 @@ open class OMEMOModule: AbstractPEPModule, XmppModule, Resetable {
             _ = SecRandomCopyBytes(kSecRandomDefault, 16, bytes.baseAddress!);
         }
         
-        var encryptedBody = Data();
         var tag = Data();
-        
-        let data = body.data(using: .utf8)!;
-        guard engine.encrypt(iv: iv, key: key, message: data, output: &encryptedBody, tag: &tag) else {
-            return .failure(.notEncrypted);
-        }
-        
         var combinedKey = key;
-        combinedKey.append(tag);
         
         let encryptedEl = Element(name: "encrypted", xmlns: OMEMOModule.XMLNS);
-        encryptedEl.addChild(Element(name: "payload", cdata: encryptedBody.base64EncodedString()));
-        
+
+        if let data = message.body?.data(using: .utf8) {
+            var encryptedBody = Data();
+            guard engine.encrypt(iv: iv, key: key, message: data, output: &encryptedBody, tag: &tag) else {
+                return .failure(.notEncrypted);
+            }
+            encryptedEl.addChild(Element(name: "payload", cdata: encryptedBody.base64EncodedString()));
+        }
+                
+        combinedKey.append(tag);
+
         let header = Element(name: "header");
         header.setAttribute("sid", value: String(signalContext.storage.identityKeyStore.localRegistrationId()));
         encryptedEl.addChild(header);
         
-        let localAddresses = storage.sessionStore.allDevices(for: context.userBareJid.stringValue, activeAndTrusted: true).map({ (deviceId) -> SignalAddress in
+        let localAddresses = forSelf ? storage.sessionStore.allDevices(for: context.userBareJid.stringValue, activeAndTrusted: true).map({ (deviceId) -> SignalAddress in
             return SignalAddress(name: context.userBareJid.stringValue, deviceId: deviceId);
-        });
+        }) : [];
         let destinations: Set<SignalAddress> = Set(remoteAddresses + localAddresses);
         header.addChildren(destinations.map({ (addr) -> Result<SignalSessionCipher.Key,SignalError> in
                 // TODO: maybe we should cache this session?
@@ -486,6 +506,22 @@ open class OMEMOModule: AbstractPEPModule, XmppModule, Resetable {
         let fingerprint = storage.identityKeyStore.identityFingerprint(forAddress: SignalAddress(name: context.userBareJid.stringValue, deviceId: Int32(bitPattern: storage.identityKeyStore.localRegistrationId())));
         
         return .successMessage(message, fingerprint: fingerprint);
+    }
+    
+    private var mamSyncsInProgress: Set<BareJID?> = [];
+    
+    open func mamSyncStarted(for jid: BareJID?) {
+        self.devicesQueue.sync {
+            self.mamSyncsInProgress.insert(jid);
+            self.postponedSessions[jid] = [];
+        }
+    }
+    
+    open func mamSyncFinished(for jid: BareJID?) {
+        self.devicesQueue.sync {
+            self.mamSyncsInProgress.remove(jid);
+            self.processPostponed(for: jid);
+        }
     }
     
     open override func onItemNotification(notification: PubSubModule.ItemNotification) {
@@ -659,7 +695,7 @@ open class OMEMOModule: AbstractPEPModule, XmppModule, Resetable {
         }
     }
 
-    func publishDeviceBundleIfNeeded(completionHandler: @escaping ()->Void) {
+    func publishDeviceBundleIfNeeded(completionHandler: (()->Void)?) {
         guard let pepJid = context?.userBareJid, let pubsubModule = context?.module(.pubsub) else {
             return;
         }
@@ -695,6 +731,70 @@ open class OMEMOModule: AbstractPEPModule, XmppModule, Resetable {
         self.publishDeviceIdIfNeeded(removeDevicesWithIds: ids);
     }
     
+    private var postponedSessions: [BareJID?:[SignalAddress]] = [:];
+    private var postponedHealing: [BareJID?:[SignalAddress]] = [:];
+    
+    private func postponeSession(for jid: BareJID?, address: SignalAddress) -> Bool {
+        return devicesQueue.sync {
+            if mamSyncsInProgress.contains(jid) {
+                if var tmp = postponedSessions[jid] {
+                    tmp.append(address);
+                    postponedSessions[jid] = tmp;
+                    return true;
+                }
+            }
+            if mamSyncsInProgress.contains(nil) {
+                if var tmp = postponedSessions[nil] {
+                    tmp.append(address);
+                    postponedSessions[nil] = tmp;
+                    return true;
+                }
+            }
+            return false;
+        }
+    }
+    
+    private func postponeHealing(for jid: BareJID?, address: SignalAddress) -> Bool {
+        return devicesQueue.sync {
+            if mamSyncsInProgress.contains(jid) {
+                if var tmp = postponedHealing[jid] {
+                    tmp.append(address);
+                    postponedHealing[jid] = tmp;
+                    return true;
+                }
+            }
+            if mamSyncsInProgress.contains(nil) {
+                if var tmp = postponedHealing[nil] {
+                    tmp.append(address);
+                    postponedHealing[nil] = tmp;
+                    return true;
+                }
+            }
+            return false;
+        }
+    }
+    
+    private func processPostponed(for jid: BareJID?) {
+        if let sessions = postponedSessions.removeValue(forKey: jid) {
+            if !sessions.isEmpty {
+                if self.storage.preKeyStore.flushDeletedPreKeys() {
+                    self.publishDeviceBundleIfNeeded(completionHandler: nil);
+                }
+            }
+            
+            for address in sessions {
+                self.completeSession(forAddress: address);
+            }
+        }
+        if let healings = postponedHealing.removeValue(forKey: jid) {
+            for healing in healings {
+                self.buildSession(forAddress: healing, completionHandler: {
+                    self.completeSession(forAddress: healing);
+                })
+            }
+        }
+    }
+    
     fileprivate func signedPreKey(regenerate: Bool = false) -> SignalSignedPreKey? {
         let signedPreKeyId = storage.signedPreKeyStore.countSignedPreKeys();
         var signedPreKey: SignalSignedPreKey? = nil;
@@ -728,9 +828,9 @@ open class OMEMOModule: AbstractPEPModule, XmppModule, Resetable {
 //        }
 //    }
 
-    fileprivate func publishDeviceBundle(currentBundle: Element?, completionHandler: @escaping ()->Void) {
+    fileprivate func publishDeviceBundle(currentBundle: Element?, completionHandler: (()->Void)?) {
         guard let identityPublicKey = storage.identityKeyStore.keyPair()?.publicKey?.base64EncodedString() else {
-            completionHandler();
+            completionHandler?();
             return;
         }
 
@@ -775,12 +875,12 @@ open class OMEMOModule: AbstractPEPModule, XmppModule, Resetable {
                 // something has changed, we need to publish new bundle!
                 publishDeviceBundle(signedPreKey: signedPreKey, preKeys: validKeys, completionHandler: completionHandler);
             } else {
-                completionHandler();
+                completionHandler?();
             }
         }
     }
 
-    func publishDeviceBundle(signedPreKey: SignalSignedPreKey, preKeys: [SignalPreKey], completionHandler: @escaping ()->Void) {
+    func publishDeviceBundle(signedPreKey: SignalSignedPreKey, preKeys: [SignalPreKey], completionHandler: (()->Void)?) {
         let identityKeyPair = storage.identityKeyStore.keyPair()!;
         
         let bundleEl = Element(name: "bundle", xmlns: OMEMOModule.XMLNS);
@@ -802,11 +902,25 @@ open class OMEMOModule: AbstractPEPModule, XmppModule, Resetable {
             switch result {
             case .success(_):
                 print("published public keys!");
-                completionHandler();
+                completionHandler?();
             case .failure(let pubsubError):
                 print("cound not publish keys:", pubsubError);
             }
         });
+    }
+    
+    private func completeSession(forAddress address: SignalAddress) {
+        let message = Message()
+        message.type = .chat;
+        message.to = JID(address.name);
+        let result = self._encode(message: message, for: [address], forSelf: false);
+        switch result {
+        case .successMessage(let message, _):
+            message.hints = [.store];
+            self.write(message);
+        case .failure(let error):
+            print("failed to complete session for address: \(address), error: \(error)");
+        }
     }
     
     open func buildSession(forAddress address: SignalAddress, completionHandler: (()->Void)? = nil) {

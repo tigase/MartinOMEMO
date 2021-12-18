@@ -132,6 +132,8 @@ public protocol SignalPreKeyStoreProtocol: AnyObject {
     func containsPreKey(withId: UInt32) -> Bool;
     
     func deletePreKey(withId: UInt32) -> Bool;
+    
+    func flushDeletedPreKeys() -> Bool;
 }
 
 public protocol SignalSignedPreKeyStoreProtocol: AnyObject {
