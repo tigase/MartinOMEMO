@@ -525,9 +525,10 @@ open class OMEMOModule: AbstractPEPModule, XmppModule, Resetable {
     }
     
     open override func onItemNotification(notification: PubSubModule.ItemNotification) {
-        if notification.node == OMEMOModule.DEVICES_LIST_NODE, let from = notification.message.from?.bareJid {
+        if notification.node == OMEMOModule.DEVICES_LIST_NODE, let context = self.context {
             switch notification.action {
             case .published(let item):
+                let from = notification.message.from?.bareJid ?? context.userBareJid;
                 checkAndPublishDevicesListIfNeeded(jid: from, list: item.payload)
             default:
                 break;
