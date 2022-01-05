@@ -22,6 +22,7 @@
 import Foundation
 import TigaseSwift
 import libsignal
+import Combine
 
 extension XmppModuleIdentifier {
     public static var omemo: XmppModuleIdentifier<OMEMOModule> {
@@ -81,9 +82,10 @@ open class OMEMOModule: AbstractPEPModule, XmppModule, Resetable {
     fileprivate var devicesFetchError: [BareJID: [Int32]] = [:];
     private var ownBrokenDevices: [Int32] = [];
 
-    public var isReady: Bool {
-        return isPepAvailable && (context?.sessionObject.getProperty(OMEMOModule.DEVICES_LIST_NODE, defValue: false) ?? false) && (context?.sessionObject.getProperty(OMEMOModule.XMLNS + ".bundle", defValue: false) ?? false);
-    }
+    @Published
+    public private(set) var isReady: Bool = false;
+    
+    public let activeDevicesPublisher = PassthroughSubject<AvailabilityChanged,Never>();
     
     public func isAvailable(for jid: BareJID) -> Bool {
         return (!(self.devicesQueue.sync(execute: { self.devices[jid] })?.isEmpty ?? true)) || !self.storage.sessionStore.allDevices(for: jid.stringValue, activeAndTrusted: true).isEmpty;
@@ -98,6 +100,7 @@ open class OMEMOModule: AbstractPEPModule, XmppModule, Resetable {
     
     public func reset(scopes: Set<ResetableScope>) {
         if scopes.contains(.session) {
+            self.isReady = false;
             self.devicesQueue.async {
                 self.devices.removeAll();
             }
@@ -601,6 +604,7 @@ open class OMEMOModule: AbstractPEPModule, XmppModule, Resetable {
                 pubsubModule.publishItem(at: jid, to: OMEMOModule.DEVICES_LIST_NODE, itemId: "current", payload: listEl!, publishOptions: publishOptions, completionHandler: { result in
                     switch result {
                     case .success(_):
+                        self.isReady = true;
                         print("device id:", ourDeviceIdStr, " successfully registered!");
                     case .failure(let pubsubError):
                         print("item registration failed!");
@@ -618,6 +622,7 @@ open class OMEMOModule: AbstractPEPModule, XmppModule, Resetable {
                                             pubsubModule.publishItem(at: jid, to: OMEMOModule.DEVICES_LIST_NODE, itemId: "current", payload: listEl!, publishOptions: publishOptions, completionHandler: { result in
                                                 switch result {
                                                 case .success(_):
+                                                    self.isReady = true;
                                                     print("device id:", ourDeviceIdStr, " successfully registered 2!");
                                                 case .failure(let error):
                                                     print("item registration failed 2! \(error)");
@@ -635,6 +640,7 @@ open class OMEMOModule: AbstractPEPModule, XmppModule, Resetable {
                     }
                 });
             } else {
+                self.isReady = true;
                 context.sessionObject.setProperty(OMEMOModule.DEVICES_LIST_NODE, value: true);
             }
         }
@@ -692,6 +698,7 @@ open class OMEMOModule: AbstractPEPModule, XmppModule, Resetable {
         }
         self.devicesQueue.async {
             self.devices[jid] = knownActiveDevices;
+            self.activeDevicesPublisher.send(AvailabilityChanged(jid: jid, activeDevices: knownActiveDevices));
             self.fire(AvailabilityChangedEvent(sessionObject: context.sessionObject, jid: jid));
         }
     }
@@ -1043,6 +1050,13 @@ open class OMEMOModule: AbstractPEPModule, XmppModule, Resetable {
             self.preKeyId = preKeyId;
         }
 
+    }
+    
+    public struct AvailabilityChanged {
+        
+        public let jid: BareJID;
+        public let activeDevices: [Int32];
+        
     }
     
     open class AvailabilityChangedEvent: Event {
