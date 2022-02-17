@@ -15,7 +15,7 @@ let package = Package(
     dependencies: [
         // Dependencies declare other packages that this package depends on.
         // .package(url: /* package url */, from: "1.0.0"),
-        .package(name: "TigaseSwift", url: "https://github.com/tigase/tigase-swift", .upToNextMinor(from: "3.1.0")),
+        .package(name: "TigaseSwift", url: "https://github.com/tigase/tigase-swift", .branch("master")),
         .package(url: "https://github.com/tigase/libsignal", .upToNextMinor(from: "1.0.0"))
     ],
     targets: [
