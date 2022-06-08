@@ -599,8 +599,8 @@ open class OMEMOModule: AbstractPEPModule, XmppModule, Resetable {
             }
         
             if changed {
-                let publishOptions = JabberDataElement(type: .submit);
-                publishOptions.addField(TextSingleField(name: "pubsub#access_model", value: "open"));
+                let publishOptions = PubSubNodeConfig();
+                publishOptions.accessModel = .open
                 pubsubModule.publishItem(at: jid, to: OMEMOModule.DEVICES_LIST_NODE, itemId: "current", payload: listEl!, publishOptions: publishOptions, completionHandler: { result in
                     switch result {
                     case .success(_):
@@ -609,13 +609,10 @@ open class OMEMOModule: AbstractPEPModule, XmppModule, Resetable {
                     case .failure(let pubsubError):
                         print("item registration failed!");
                         if pubsubError.error == .conflict() {
-                            pubsubModule.retrieveNodeConfiguration(from: jid, node: OMEMOModule.DEVICES_LIST_NODE, completionHandler: { result in
+                            pubsubModule.retrieveNodeConfiguration(from: jid, node: OMEMOModule.DEVICES_LIST_NODE, resultHandler: { result in
                                 switch result {
                                 case .success(let form):
-                                    guard let field: ListSingleField = form.getField(named: "pubsub#access_model") else {
-                                        return;
-                                    }
-                                    field.value = "open";
+                                    form.accessModel = .open;
                                     pubsubModule.configureNode(at: jid, node: OMEMOModule.DEVICES_LIST_NODE, with: form, completionHandler: { result in
                                         switch result {
                                         case .success(_):
@@ -900,8 +897,8 @@ open class OMEMOModule: AbstractPEPModule, XmppModule, Resetable {
         });
         bundleEl.addChild(Element(name: "prekeys", children: preKeysElems));
         
-        let publishOptions = JabberDataElement(type: .submit);
-        publishOptions.addField(TextSingleField(name: "pubsub#access_model", value: "open"));
+        let publishOptions = PubSubNodeConfig();
+        publishOptions.accessModel = .open;
         
         guard let pubsubModule = context?.module(.pubsub) else {
             return;
