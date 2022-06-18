@@ -62,9 +62,6 @@ open class OMEMOModule: AbstractPEPModule, XmppModule, Resetable {
             if isPepAvailable {
                 publishDeviceBundleIfNeeded() {
                     self.publishDeviceIdIfNeeded();
-                    if let context = self.context {
-                        context.sessionObject.setProperty(OMEMOModule.XMLNS + ".bundle", value: true);
-                    }
                 }
             }
         }
@@ -609,7 +606,7 @@ open class OMEMOModule: AbstractPEPModule, XmppModule, Resetable {
                     case .failure(let pubsubError):
                         print("item registration failed!");
                         if pubsubError.error == .conflict() {
-                            pubsubModule.retrieveNodeConfiguration(from: jid, node: OMEMOModule.DEVICES_LIST_NODE, resultHandler: { result in
+                            pubsubModule.retrieveNodeConfiguration(from: jid, node: OMEMOModule.DEVICES_LIST_NODE, completionHandler: { result in
                                 switch result {
                                 case .success(let form):
                                     form.accessModel = .open;
@@ -638,7 +635,6 @@ open class OMEMOModule: AbstractPEPModule, XmppModule, Resetable {
                 });
             } else {
                 self.isReady = true;
-                context.sessionObject.setProperty(OMEMOModule.DEVICES_LIST_NODE, value: true);
             }
         }
         
@@ -696,7 +692,6 @@ open class OMEMOModule: AbstractPEPModule, XmppModule, Resetable {
         self.devicesQueue.async {
             self.devices[jid] = knownActiveDevices;
             self.activeDevicesPublisher.send(AvailabilityChanged(jid: jid, activeDevices: knownActiveDevices));
-            self.fire(AvailabilityChangedEvent(sessionObject: context.sessionObject, jid: jid));
         }
     }
 
@@ -1056,29 +1051,6 @@ open class OMEMOModule: AbstractPEPModule, XmppModule, Resetable {
         
     }
     
-    open class AvailabilityChangedEvent: Event {
-        
-        public static let TYPE = AvailabilityChangedEvent();
-        
-        public let type = "OMEMOAvailabilityChangedEvent";
-        
-        public let sessionObject: SessionObject!;
-        public var account: BareJID {
-            return sessionObject.context.userBareJid;
-        }
-        public let jid: BareJID!;
-        
-        init() {
-            self.sessionObject = nil;
-            self.jid = nil;
-        }
-        
-        public init(sessionObject: SessionObject, jid: BareJID) {
-            self.sessionObject = sessionObject;
-            self.jid = jid;
-        }
-        
-    }
 }
 
 public protocol AES_GCM_Engine {
