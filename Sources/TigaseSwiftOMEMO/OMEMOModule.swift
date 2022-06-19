@@ -85,7 +85,7 @@ open class OMEMOModule: AbstractPEPModule, XmppModule, Resetable {
     public let activeDevicesPublisher = PassthroughSubject<AvailabilityChanged,Never>();
     
     public func isAvailable(for jid: BareJID) -> Bool {
-        return (!(self.devicesQueue.sync(execute: { self.devices[jid] })?.isEmpty ?? true)) || !self.storage.sessionStore.allDevices(for: jid.stringValue, activeAndTrusted: true).isEmpty;
+        return (!(self.devicesQueue.sync(execute: { self.devices[jid] })?.isEmpty ?? true)) || !self.storage.sessionStore.allDevices(for: jid.description, activeAndTrusted: true).isEmpty;
     }
     
     public init(aesGCMEngine: AES_GCM_Engine, signalContext: SignalContext, signalStorage: SignalStorage) {
@@ -128,7 +128,7 @@ open class OMEMOModule: AbstractPEPModule, XmppModule, Resetable {
 
     
     public func process(stanza: Stanza) throws {
-        throw ErrorCondition.feature_not_implemented;
+        throw XMPPError.feature_not_implemented;
     }
     
     public func decode(message: Message, serverMsgId: String? = nil) -> DecryptionResult<Message, SignalError> {
@@ -144,33 +144,33 @@ open class OMEMOModule: AbstractPEPModule, XmppModule, Resetable {
             return .failure(.unknown);
         }
 
-        guard let encryptedEl = message.findChild(name: "encrypted", xmlns: OMEMOModule.XMLNS) else {
+        guard let encryptedEl = message.firstChild(name: "encrypted", xmlns: OMEMOModule.XMLNS) else {
             return .failure(SignalError.notEncrypted);
         }
         
-        guard let headerEl = encryptedEl.findChild(name: "header"), let sid = UInt32(headerEl.getAttribute("sid") ?? "") else {
+        guard let headerEl = encryptedEl.firstChild(name: "header"), let sid = UInt32(headerEl.attribute("sid") ?? "") else {
             return .failure(.invalidArgument);
         }
         
         let localDeviceIdStr = String(signalContext.storage.identityKeyStore.localRegistrationId());
         
-        guard headerEl.findChild(where: { (el) -> Bool in
-            return el.name == "key" && el.getAttribute("rid") == localDeviceIdStr;
+        guard headerEl.firstChild(where: { (el) -> Bool in
+            return el.name == "key" && el.attribute("rid") == localDeviceIdStr;
         }) != nil else {
             guard context.userBareJid != from || sid != signalContext.storage.identityKeyStore.localRegistrationId() else {
                 return .failure(.duplicateMessage);
             }
-            guard encryptedEl.findChild(name: "payload") != nil else {
+            guard encryptedEl.firstChild(name: "payload") != nil else {
                 return .failure(.duplicateMessage);
             }
             return .failure(.invalidMessage);
         }
         
-        let possibleKeys = headerEl.getChildren(where: { (el) -> Bool in
-            return el.name == "key" && el.getAttribute("rid") == localDeviceIdStr;
+        let possibleKeys = headerEl.filterChildren(where: { (el) -> Bool in
+            return el.name == "key" && el.attribute("rid") == localDeviceIdStr;
         }).map({ (keyEl) -> KeyDecryptionResult in
-            let prekey = "true" == keyEl.getAttribute("prekey") || keyEl.getAttribute("prekey") == "1";
-            let address = SignalAddress(name: from.stringValue, deviceId: Int32(bitPattern: sid));
+            let prekey = "true" == keyEl.attribute("prekey") || keyEl.attribute("prekey") == "1";
+            let address = SignalAddress(name: from.description, deviceId: Int32(bitPattern: sid));
             guard let keyElValue = keyEl.value, let key = Data(base64Encoded: keyElValue) else {
                 return .init(result: .failure(.invalidArgument), address: address, isPrekey: prekey);
             }
@@ -201,7 +201,7 @@ open class OMEMOModule: AbstractPEPModule, XmppModule, Resetable {
                     return .failure(.unknown);
                 }
             } else {
-                guard encryptedEl.findChild(name: "payload") != nil else {
+                guard encryptedEl.hasChild(name: "payload") else {
                     return .failure(.duplicateMessage);
                 }
                 return .failure(.invalidMessage);
@@ -233,11 +233,11 @@ open class OMEMOModule: AbstractPEPModule, XmppModule, Resetable {
                 decodedKey = decodedKey.subdata(in: 0..<16);
             }
             
-            guard let ivStr = headerEl.findChild(name: "iv")?.value, let iv = Data(base64Encoded: ivStr) else {
+            guard let ivStr = headerEl.firstChild(name: "iv")?.value, let iv = Data(base64Encoded: ivStr) else {
                 return .failure(.invalidArgument);
             }
             
-            guard let payloadValue = encryptedEl.findChild(name: "payload")?.value, let payload = Data(base64Encoded: payloadValue) else {
+            guard let payloadValue = encryptedEl.firstChild(name: "payload")?.value, let payload = Data(base64Encoded: payloadValue) else {
                 return .successTransportKey(decodedKey, iv: iv);
             }
 
@@ -278,7 +278,7 @@ open class OMEMOModule: AbstractPEPModule, XmppModule, Resetable {
         var addresses: [SignalAddress] = [];
         for jid in jids {
             if let devices = self.devices(for: jid) {
-                addresses.append(contentsOf: devices.map({ SignalAddress(name: jid.stringValue, deviceId: $0) }));
+                addresses.append(contentsOf: devices.map({ SignalAddress(name: jid.description, deviceId: $0) }));
                 for address in addresses.filter({ !self.storage.sessionStore.containsSessionRecord(forAddress: $0) }) {
                     group.enter();
                     self.buildSession(forAddress: address, completionHandler: {
@@ -292,23 +292,23 @@ open class OMEMOModule: AbstractPEPModule, XmppModule, Resetable {
                     case .success(let items):
                         print("got published devices from:", jid, ", ", items.items.first as Any);
                         if let listEl = items.items.first?.payload, listEl.name == "list" && listEl.xmlns == "eu.siacs.conversations.axolotl" {
-                            let knownActiveDevices: [Int32] = listEl.mapChildren(transform: { $0.getAttribute("id") }).compactMap({ Int32($0) });
+                            let knownActiveDevices: [Int32] = listEl.compactMapChildren({$0.attribute("id") }).compactMap({ Int32($0) });
                                 
                             
-                            let allDevices = self.storage.sessionStore.allDevices(for: jid.stringValue, activeAndTrusted: true);
+                            let allDevices = self.storage.sessionStore.allDevices(for: jid.description, activeAndTrusted: true);
                             allDevices.filter { (id) -> Bool in
                                 return !knownActiveDevices.contains(id);
                                 }.forEach { (deviceId) in
-                                    _ = self.storage.identityKeyStore.setStatus(active: false, forIdentity: SignalAddress(name: jid.stringValue, deviceId: deviceId));
+                                    _ = self.storage.identityKeyStore.setStatus(active: false, forIdentity: SignalAddress(name: jid.description, deviceId: deviceId));
                             }
                             
                             knownActiveDevices.filter { (id) -> Bool in
                                 return !allDevices.contains(id);
                                 }.forEach { (deviceId) in
                                     // TODO: we should enable this device key if we have its identity!
-                                    _ = self.storage.identityKeyStore.setStatus(active: true, forIdentity: SignalAddress(name: jid.stringValue, deviceId: deviceId));
+                                    _ = self.storage.identityKeyStore.setStatus(active: true, forIdentity: SignalAddress(name: jid.description, deviceId: deviceId));
                             }
-                            addresses.append(contentsOf: knownActiveDevices.map({ SignalAddress(name: jid.stringValue, deviceId: $0) }));
+                            addresses.append(contentsOf: knownActiveDevices.map({ SignalAddress(name: jid.description, deviceId: $0) }));
                         }
                         
                         // should we start fetching sessions here? without waiting for all JIDs to return? should improve performance
@@ -365,17 +365,17 @@ open class OMEMOModule: AbstractPEPModule, XmppModule, Resetable {
         completionHandler(result);
     }
     
-    public func decryptFile(url localUrl: URL, fragment: String) -> Result<Data,ErrorCondition> {
+    public func decryptFile(url localUrl: URL, fragment: String) -> Result<Data,XMPPError> {
         guard let data = try? Data(contentsOf: localUrl) else {
-            return .failure(ErrorCondition.item_not_found);
+            return .failure(XMPPError.item_not_found);
         }
 
         return decryptFile(data: data, fragment: fragment);
     }
     
-    public func decryptFile(data inData: Data, fragment: String) -> Result<Data,ErrorCondition> {
+    public func decryptFile(data inData: Data, fragment: String) -> Result<Data,XMPPError> {
         guard fragment.count % 2 == 0 && fragment.count > 64 && inData.count > 32 else {
-            return .failure(.not_acceptable);
+            return .failure(.not_acceptable(nil));
         }
         
         let fragmentData = fragment.map { (c) -> UInt8 in
@@ -399,21 +399,21 @@ open class OMEMOModule: AbstractPEPModule, XmppModule, Resetable {
         var decoded = Data();
         
         guard engine.decrypt(iv: iv, key: key, encoded: encodedData, auth: tag, output: &decoded) else {
-            return .failure(.not_acceptable);
+            return .failure(XMPPError.not_acceptable(nil));
         }
         
         return .success(decoded);
     }
     
-    public func encryptFile(url: URL) -> Result<(Data, String),ErrorCondition> {
+    public func encryptFile(url: URL) -> Result<(Data, String),XMPPError> {
         guard let data = try? Data(contentsOf: url) else {
-            return .failure(ErrorCondition.item_not_found);
+            return .failure(XMPPError.item_not_found);
         }
 
         return encryptFile(data: data);
     }
     
-    public func encryptFile(data: Data) -> Result<(Data, String),ErrorCondition> {
+    public func encryptFile(data: Data) -> Result<(Data, String),XMPPError> {
         var iv = Data(count: 12);
         iv.withUnsafeMutableBytes { (bytes) -> Void in
             _ = SecRandomCopyBytes(kSecRandomDefault, 12, bytes.baseAddress!);
@@ -428,7 +428,7 @@ open class OMEMOModule: AbstractPEPModule, XmppModule, Resetable {
         var tag = Data();
 
         guard engine.encrypt(iv: iv, key: key, message: data, output: &encryptedBody, tag: &tag) else {
-            return .failure(.not_acceptable);
+            return .failure(.not_acceptable("Invalid decryption key"));
         }
         
         let combinedKey = iv + key;
@@ -467,11 +467,11 @@ open class OMEMOModule: AbstractPEPModule, XmppModule, Resetable {
         combinedKey.append(tag);
 
         let header = Element(name: "header");
-        header.setAttribute("sid", value: String(signalContext.storage.identityKeyStore.localRegistrationId()));
+        header.attribute("sid", newValue: String(signalContext.storage.identityKeyStore.localRegistrationId()));
         encryptedEl.addChild(header);
         
-        let localAddresses = forSelf ? storage.sessionStore.allDevices(for: context.userBareJid.stringValue, activeAndTrusted: true).map({ (deviceId) -> SignalAddress in
-            return SignalAddress(name: context.userBareJid.stringValue, deviceId: deviceId);
+        let localAddresses = forSelf ? storage.sessionStore.allDevices(for: context.userBareJid.description, activeAndTrusted: true).map({ (deviceId) -> SignalAddress in
+            return SignalAddress(name: context.userBareJid.description, deviceId: deviceId);
         }) : [];
         let destinations: Set<SignalAddress> = Set(remoteAddresses + localAddresses);
         header.addChildren(destinations.map({ (addr) -> Result<SignalSessionCipher.Key,SignalError> in
@@ -484,9 +484,9 @@ open class OMEMOModule: AbstractPEPModule, XmppModule, Resetable {
                 switch result {
                 case .success(let key):
                     let keyEl = Element(name: "key", cdata: key.key.base64EncodedString());
-                    keyEl.setAttribute("rid", value: String(key.deviceId));
+                    keyEl.attribute("rid", newValue: String(key.deviceId));
                     if key.prekey {
-                        keyEl.setAttribute("prekey", value: "true");
+                        keyEl.attribute("prekey", newValue: "true");
                     }
                     return keyEl;
                 case .failure(_):
@@ -503,7 +503,7 @@ open class OMEMOModule: AbstractPEPModule, XmppModule, Resetable {
         message.addChild(Element(name: "store", xmlns: "urn:xmpp:hints"));
         message.addChild(encryptedEl);
         
-        let fingerprint = storage.identityKeyStore.identityFingerprint(forAddress: SignalAddress(name: context.userBareJid.stringValue, deviceId: Int32(bitPattern: storage.identityKeyStore.localRegistrationId())));
+        let fingerprint = storage.identityKeyStore.identityFingerprint(forAddress: SignalAddress(name: context.userBareJid.description, deviceId: Int32(bitPattern: storage.identityKeyStore.localRegistrationId())));
         
         return .successMessage(message, fingerprint: fingerprint);
     }
@@ -578,7 +578,7 @@ open class OMEMOModule: AbstractPEPModule, XmppModule, Resetable {
                     return String(deviceId);
                 }
                 listEl!.removeChildren(where: { (el) -> Bool in
-                    guard let id = el.getAttribute("id") else {
+                    guard let id = el.attribute("id") else {
                         return false;
                     }
                     return deviceIds.contains(id);
@@ -588,8 +588,8 @@ open class OMEMOModule: AbstractPEPModule, XmppModule, Resetable {
         
             let ourDeviceId = self.storage.identityKeyStore.localRegistrationId();
             let ourDeviceIdStr = String(ourDeviceId);
-            if listEl?.findChild(where: { (deviceEl) -> Bool in
-                deviceEl.getAttribute("id") == ourDeviceIdStr;
+            if listEl?.firstChild(where: { (deviceEl) -> Bool in
+                deviceEl.attribute("id") == ourDeviceIdStr;
             }) == nil {
                 listEl?.addChild(Element(name: "device", attributes: ["id": ourDeviceIdStr]));
                 changed = true;
@@ -638,25 +638,25 @@ open class OMEMOModule: AbstractPEPModule, XmppModule, Resetable {
             }
         }
         
-        let knownActiveDevices = listEl!.mapChildren(transform: { (el) -> Int32? in
-            guard let id = el.getAttribute("id") else {
+        let knownActiveDevices = listEl!.compactMapChildren({ el -> Int32? in
+            guard let id = el.attribute("id") else {
                 return nil;
             }
             return Int32(id);
         });
         
-        let allDevices = storage.sessionStore.allDevices(for: jid.stringValue, activeAndTrusted: true);
+        let allDevices = storage.sessionStore.allDevices(for: jid.description, activeAndTrusted: true);
         allDevices.filter { (id) -> Bool in
             return !knownActiveDevices.contains(id);
             }.forEach { (deviceId) in
-                _ = storage.identityKeyStore.setStatus(active: false, forIdentity: SignalAddress(name: jid.stringValue, deviceId: deviceId));
+                _ = storage.identityKeyStore.setStatus(active: false, forIdentity: SignalAddress(name: jid.description, deviceId: deviceId));
         }
         
         knownActiveDevices.filter { (id) -> Bool in
             return !allDevices.contains(id);
             }.forEach { (deviceId) in
                 // TODO: we should enable this device key if we have its identity!
-                _ = storage.identityKeyStore.setStatus(active: true, forIdentity: SignalAddress(name: jid.stringValue, deviceId: deviceId));
+                _ = storage.identityKeyStore.setStatus(active: true, forIdentity: SignalAddress(name: jid.description, deviceId: deviceId));
         }
         
         if me {
@@ -678,7 +678,7 @@ open class OMEMOModule: AbstractPEPModule, XmppModule, Resetable {
                 guard deviceId != self.storage.identityKeyStore.localRegistrationId() else {
                     return;
                 }
-                let address = SignalAddress(name: jid.stringValue, deviceId: deviceId);
+                let address = SignalAddress(name: jid.description, deviceId: deviceId);
                 if !self.storage.sessionStore.containsSessionRecord(forAddress: address) {
                     // we do not have a session, so we need to build one!
                     group.enter();
@@ -723,7 +723,7 @@ open class OMEMOModule: AbstractPEPModule, XmppModule, Resetable {
         }
         
         withIds.forEach { deviceId in
-            _ = self.storage.identityKeyStore.setStatus(active: false, forIdentity: SignalAddress(name: pepJid.stringValue, deviceId: deviceId));
+            _ = self.storage.identityKeyStore.setStatus(active: false, forIdentity: SignalAddress(name: pepJid.description, deviceId: deviceId));
             
             pubsubModule.deleteNode(from: pepJid, node: bundleNode(for: UInt32(bitPattern: deviceId)), completionHandler: nil);
         }
@@ -836,15 +836,15 @@ open class OMEMOModule: AbstractPEPModule, XmppModule, Resetable {
 
         var flush: Bool = currentBundle == nil;
         if !flush {
-            flush = identityPublicKey != currentBundle?.findChild(name: "identityKey")?.value;
+            flush = identityPublicKey != currentBundle?.firstChild(name: "identityKey")?.value;
         }
         
         if let signedPreKey = self.signedPreKey(regenerate: flush), let signedPreKeyBase64 = signedPreKey.publicKeyData?.base64EncodedString() {
             let signatureBase64 = signedPreKey.signature.base64EncodedString();
-            var changed = flush || signedPreKeyBase64 != currentBundle?.findChild(name: "signedPreKeyPublic")?.value || signatureBase64 != currentBundle?.findChild(name: "signedPreKeySignature")?.value;
+            var changed = flush || signedPreKeyBase64 != currentBundle?.firstChild(name: "signedPreKeyPublic")?.value || signatureBase64 != currentBundle?.firstChild(name: "signedPreKeySignature")?.value;
             
-            let currentKeys = currentBundle?.findChild(name: "prekeys")?.mapChildren(transform: { (preKeyEl) -> UInt32? in
-                guard let preKeyId = preKeyEl.getAttribute("preKeyId") else {
+            let currentKeys = currentBundle?.firstChild(name: "prekeys")?.compactMapChildren({ preKeyEl -> UInt32? in
+                guard let preKeyId = preKeyEl.attribute("preKeyId") else {
                     return nil;
                 }
                 return UInt32(preKeyId);
@@ -994,21 +994,19 @@ open class OMEMOModule: AbstractPEPModule, XmppModule, Resetable {
                 return nil;
             }
             
-            guard let preKeys = el.findChild(name: "prekeys")?.mapChildren(transform: { (el) -> OMEMOPreKey? in
-                return OMEMOPreKey(from: el);
-            }), !preKeys.isEmpty else {
+            guard let preKeys = el.firstChild(name: "prekeys")?.compactMapChildren(OMEMOPreKey.init(from:)), !preKeys.isEmpty else {
                 return nil;
             }
             
-            guard let signedKeyPublic = el.findChild(name: "signedPreKeyPublic"), let signedPreKeyIdStr = signedKeyPublic.getAttribute("signedPreKeyId"), let signedPreKeyId = UInt32(signedPreKeyIdStr), let signedKeyPublicValue = signedKeyPublic.value, let signedKeyPublicData = Data(base64Encoded: signedKeyPublicValue, options: [.ignoreUnknownCharacters]) else {
+            guard let signedKeyPublic = el.firstChild(name: "signedPreKeyPublic"), let signedPreKeyIdStr = signedKeyPublic.attribute("signedPreKeyId"), let signedPreKeyId = UInt32(signedPreKeyIdStr), let signedKeyPublicValue = signedKeyPublic.value, let signedKeyPublicData = Data(base64Encoded: signedKeyPublicValue, options: [.ignoreUnknownCharacters]) else {
                 return nil;
             }
 
-            guard let identityKeyValue = el.findChild(name: "identityKey")?.value, let identityKeyData = Data(base64Encoded: identityKeyValue, options: [.ignoreUnknownCharacters]) else {
+            guard let identityKeyValue = el.firstChild(name: "identityKey")?.value, let identityKeyData = Data(base64Encoded: identityKeyValue, options: [.ignoreUnknownCharacters]) else {
                 return nil;
             }
 
-            guard let signatureValue = el.findChild(name: "signedPreKeySignature")?.value, let signatureData = Data(base64Encoded: signatureValue, options: [.ignoreUnknownCharacters]) else {
+            guard let signatureValue = el.firstChild(name: "signedPreKeySignature")?.value, let signatureData = Data(base64Encoded: signatureValue, options: [.ignoreUnknownCharacters]) else {
                 return nil;
             }
             
@@ -1027,7 +1025,7 @@ open class OMEMOModule: AbstractPEPModule, XmppModule, Resetable {
         public let data: Data;
         
         public convenience init?(from: Element) {
-            guard from.name == "preKeyPublic", let value = from.value, let preKeyIdStr = from.getAttribute("preKeyId") else {
+            guard from.name == "preKeyPublic", let value = from.value, let preKeyIdStr = from.attribute("preKeyId") else {
                 return nil;
             }
             guard let data = Data(base64Encoded: value, options: [.ignoreUnknownCharacters]), let preKeyId = UInt32(preKeyIdStr) else {
