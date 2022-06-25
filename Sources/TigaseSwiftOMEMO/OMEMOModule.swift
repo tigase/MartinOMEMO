@@ -23,6 +23,7 @@ import Foundation
 import TigaseSwift
 import libsignal
 import Combine
+import CryptoKit
 
 extension XmppModuleIdentifier {
     public static var omemo: XmppModuleIdentifier<OMEMOModule> {
@@ -71,7 +72,6 @@ open class OMEMOModule: AbstractPEPModule, XmppModule, Resetable {
 
     public let features: [String] = [OMEMOModule.DEVICES_LIST_NODE + "+notify"];
     
-    public let engine: AES_GCM_Engine;
     public let signalContext: SignalContext;
     public let storage: SignalStorage;
     fileprivate let devicesQueue: DispatchQueue = DispatchQueue(label: "omemo_devices_dispatch_queue");
@@ -88,10 +88,9 @@ open class OMEMOModule: AbstractPEPModule, XmppModule, Resetable {
         return (!(self.devicesQueue.sync(execute: { self.devices[jid] })?.isEmpty ?? true)) || !self.storage.sessionStore.allDevices(for: jid.description, activeAndTrusted: true).isEmpty;
     }
     
-    public init(aesGCMEngine: AES_GCM_Engine, signalContext: SignalContext, signalStorage: SignalStorage) {
+    public init(signalContext: SignalContext, signalStorage: SignalStorage) {
         self.signalContext = signalContext;
         self.storage = signalStorage;
-        self.engine = aesGCMEngine;
         super.init();
     }
     
@@ -227,11 +226,12 @@ open class OMEMOModule: AbstractPEPModule, XmppModule, Resetable {
                 }
             }
 
-            var auth: Data? = nil;
+            var auth = Data();
             if decodedKey.count >= 32 {
                 auth = decodedKey.subdata(in: 16..<decodedKey.count);
                 decodedKey = decodedKey.subdata(in: 0..<16);
             }
+            
             
             guard let ivStr = headerEl.firstChild(name: "iv")?.value, let iv = Data(base64Encoded: ivStr) else {
                 return .failure(.invalidArgument);
@@ -241,9 +241,12 @@ open class OMEMOModule: AbstractPEPModule, XmppModule, Resetable {
                 return .successTransportKey(decodedKey, iv: iv);
             }
 
-
-            var decoded = Data();
-            guard engine.decrypt(iv: iv, key: decodedKey, encoded: payload, auth: auth, output: &decoded) else {
+            guard let sealed = try? AES.GCM.SealedBox(nonce: AES.GCM.Nonce(data: iv), ciphertext: payload, tag: auth) else {
+                return .failure(.invalidArgument);
+            }
+            
+            let key = SymmetricKey(data: decodedKey);
+            guard let decoded = try? AES.GCM.open(sealed, using: key) else {
                 print("decoding of encrypted message failed!");
                 return .failure(.invalidMac);
             }
@@ -365,7 +368,7 @@ open class OMEMOModule: AbstractPEPModule, XmppModule, Resetable {
         completionHandler(result);
     }
     
-    public func decryptFile(url localUrl: URL, fragment: String) -> Result<Data,XMPPError> {
+    public static func decryptFile(url localUrl: URL, fragment: String) -> Result<Data,XMPPError> {
         guard let data = try? Data(contentsOf: localUrl) else {
             return .failure(XMPPError.item_not_found);
         }
@@ -373,39 +376,31 @@ open class OMEMOModule: AbstractPEPModule, XmppModule, Resetable {
         return decryptFile(data: data, fragment: fragment);
     }
     
-    public func decryptFile(data inData: Data, fragment: String) -> Result<Data,XMPPError> {
+    public static func decryptFile(data inData: Data, fragment: String) -> Result<Data,XMPPError> {
         guard fragment.count % 2 == 0 && fragment.count > 64 && inData.count > 32 else {
             return .failure(.not_acceptable(nil));
         }
         
-        let fragmentData = fragment.map { (c) -> UInt8 in
-            return UInt8(c.hexDigitValue ?? 0);
-        };
-
-        let ivLen = fragmentData.count - (32 * 2);
-        
-        var iv = Data();
-        var key = Data();
-        
-        for i in 0..<(ivLen/2) {
-            iv.append(fragmentData[i*2]*16 + fragmentData[i*2+1]);
-        }
-        for i in (ivLen/2)..<(fragmentData.count/2) {
-            key.append(fragmentData[i*2]*16 + fragmentData[i*2+1]);
-        }
+        let ivLen = fragment.count - (32 * 2);
+        let ivEndOffset = fragment.index(fragment.startIndex, offsetBy: ivLen - 1);
+        let iv = Data(hex: fragment[...ivEndOffset]);
+        let key = SymmetricKey(data: Data(hex: fragment[fragment.index(after: ivEndOffset)...]));
         
         let tag = inData.subdata(in: inData.count-16..<inData.count);
         let encodedData = inData.subdata(in: 0..<(inData.count-16));
-        var decoded = Data();
-        
-        guard engine.decrypt(iv: iv, key: key, encoded: encodedData, auth: tag, output: &decoded) else {
+
+        guard let sealed = try? AES.GCM.SealedBox(nonce: .init(data: iv), ciphertext: encodedData, tag: tag) else {
             return .failure(XMPPError.not_acceptable(nil));
         }
-        
+
+        guard let decoded = try? AES.GCM.open(sealed, using: key) else {
+            return .failure(.not_acceptable(nil))
+        }
+
         return .success(decoded);
     }
     
-    public func encryptFile(url: URL) -> Result<(Data, String),XMPPError> {
+    public static func encryptFile(url: URL) -> Result<(Data, String),XMPPError> {
         guard let data = try? Data(contentsOf: url) else {
             return .failure(XMPPError.item_not_found);
         }
@@ -413,27 +408,17 @@ open class OMEMOModule: AbstractPEPModule, XmppModule, Resetable {
         return encryptFile(data: data);
     }
     
-    public func encryptFile(data: Data) -> Result<(Data, String),XMPPError> {
-        var iv = Data(count: 12);
-        iv.withUnsafeMutableBytes { (bytes) -> Void in
-            _ = SecRandomCopyBytes(kSecRandomDefault, 12, bytes.baseAddress!);
-        }
+    public static func encryptFile(data: Data) -> Result<(Data, String),XMPPError> {
+        
+        let key = SymmetricKey(size: .bits256);
 
-        var key = Data(count: 32);
-        key.withUnsafeMutableBytes { (bytes) -> Void in
-            _ = SecRandomCopyBytes(kSecRandomDefault, 32, bytes.baseAddress!);
-        }
-
-        var encryptedBody = Data();
-        var tag = Data();
-
-        guard engine.encrypt(iv: iv, key: key, message: data, output: &encryptedBody, tag: &tag) else {
-            return .failure(.not_acceptable("Invalid decryption key"));
+        guard let sealed = try? AES.GCM.seal(data, using: key) else {
+            return .failure(.not_acceptable("Invalid encryption key"));
         }
         
-        let combinedKey = iv + key;
+        let combinedKey = Data(sealed.nonce) + key.data();
 
-        return .success((encryptedBody + tag, combinedKey.map({ String(format: "%02x", $0) }).joined()));
+        return .success((sealed.ciphertext + sealed.tag, combinedKey.hex()));
     }
     
     private func _encode(message: Message, for remoteAddresses: [SignalAddress], forSelf: Bool = true) -> EncryptionResult<Message,SignalError> {
@@ -441,31 +426,16 @@ open class OMEMOModule: AbstractPEPModule, XmppModule, Resetable {
             return .failure(.unknown);
         }
         
-        var iv = Data(count: 12);
-        iv.withUnsafeMutableBytes { (bytes) -> Void in
-            _ = SecRandomCopyBytes(kSecRandomDefault, 12, bytes.baseAddress!);
-        }
-
-        var key = Data(count: 16);
-        key.withUnsafeMutableBytes { (bytes) -> Void in
-            _ = SecRandomCopyBytes(kSecRandomDefault, 16, bytes.baseAddress!);
-        }
-        
-        var tag = Data();
-        var combinedKey = key;
-        
+        let key = SymmetricKey(size: .bits128);
         let encryptedEl = Element(name: "encrypted", xmlns: OMEMOModule.XMLNS);
 
-        if let data = message.body?.data(using: .utf8) {
-            var encryptedBody = Data();
-            guard engine.encrypt(iv: iv, key: key, message: data, output: &encryptedBody, tag: &tag) else {
-                return .failure(.notEncrypted);
-            }
-            encryptedEl.addChild(Element(name: "payload", cdata: encryptedBody.base64EncodedString()));
+        guard let data = message.body?.data(using: .utf8), let sealed = try? AES.GCM.seal(data, using: key) else {
+            return .failure(.notEncrypted);
         }
+                    
+        encryptedEl.addChild(Element(name: "payload", cdata: sealed.ciphertext.base64EncodedString()));
                 
-        combinedKey.append(tag);
-
+        let combinedKey = key.data() + sealed.tag;
         let header = Element(name: "header");
         header.attribute("sid", newValue: String(signalContext.storage.identityKeyStore.localRegistrationId()));
         encryptedEl.addChild(header);
@@ -497,14 +467,13 @@ open class OMEMOModule: AbstractPEPModule, XmppModule, Resetable {
             }).map({ el -> Element in
                 return el!;
             }));
-        header.addChild(Element(name: "iv", cdata: iv.base64EncodedString()));
+            header.addChild(Element(name: "iv", cdata: Data(sealed.nonce).base64EncodedString()));
 
         message.body = nil;
         message.addChild(Element(name: "store", xmlns: "urn:xmpp:hints"));
         message.addChild(encryptedEl);
         
         let fingerprint = storage.identityKeyStore.identityFingerprint(forAddress: SignalAddress(name: context.userBareJid.description, deviceId: Int32(bitPattern: storage.identityKeyStore.localRegistrationId())));
-        
         return .successMessage(message, fingerprint: fingerprint);
     }
     
@@ -1048,14 +1017,6 @@ open class OMEMOModule: AbstractPEPModule, XmppModule, Resetable {
         public let activeDevices: [Int32];
         
     }
-    
-}
-
-public protocol AES_GCM_Engine {
-    
-    func encrypt(iv: Data, key: Data, message: Data, output: UnsafeMutablePointer<Data>?, tag: UnsafeMutablePointer<Data>?) -> Bool;
-    
-    func decrypt(iv: Data, key: Data, encoded: Data, auth tag: Data?, output: UnsafeMutablePointer<Data>?) -> Bool;
     
 }
 
