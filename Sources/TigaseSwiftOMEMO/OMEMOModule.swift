@@ -127,7 +127,7 @@ open class OMEMOModule: AbstractPEPModule, XmppModule, Resetable {
 
     
     public func process(stanza: Stanza) throws {
-        throw XMPPError.feature_not_implemented;
+        throw XMPPError(condition: .feature_not_implemented);
     }
     
     public func decode(message: Message, serverMsgId: String? = nil) -> DecryptionResult<Message, SignalError> {
@@ -368,17 +368,14 @@ open class OMEMOModule: AbstractPEPModule, XmppModule, Resetable {
         completionHandler(result);
     }
     
-    public static func decryptFile(url localUrl: URL, fragment: String) -> Result<Data,XMPPError> {
-        guard let data = try? Data(contentsOf: localUrl) else {
-            return .failure(XMPPError.item_not_found);
-        }
-
-        return decryptFile(data: data, fragment: fragment);
+    public static func decryptFile(url localUrl: URL, fragment: String) throws -> Data {
+        let data = try Data(contentsOf: localUrl)
+        return try decryptFile(data: data, fragment: fragment);
     }
     
-    public static func decryptFile(data inData: Data, fragment: String) -> Result<Data,XMPPError> {
+    public static func decryptFile(data inData: Data, fragment: String) throws -> Data {
         guard fragment.count % 2 == 0 && fragment.count > 64 && inData.count > 32 else {
-            return .failure(.not_acceptable(nil));
+            throw XMPPError(condition: .not_acceptable);
         }
         
         let ivLen = fragment.count - (32 * 2);
@@ -390,35 +387,31 @@ open class OMEMOModule: AbstractPEPModule, XmppModule, Resetable {
         let encodedData = inData.subdata(in: 0..<(inData.count-16));
 
         guard let sealed = try? AES.GCM.SealedBox(nonce: .init(data: iv), ciphertext: encodedData, tag: tag) else {
-            return .failure(XMPPError.not_acceptable(nil));
+            throw XMPPError(condition: .not_acceptable);
         }
 
         guard let decoded = try? AES.GCM.open(sealed, using: key) else {
-            return .failure(.not_acceptable(nil))
+            throw XMPPError(condition: .not_acceptable);
         }
 
-        return .success(decoded);
+        return decoded;
     }
     
-    public static func encryptFile(url: URL) -> Result<(Data, String),XMPPError> {
-        guard let data = try? Data(contentsOf: url) else {
-            return .failure(XMPPError.item_not_found);
-        }
-
-        return encryptFile(data: data);
+    public static func encryptFile(url: URL) throws -> (Data, String) {
+        let data = try Data(contentsOf: url);
+        return try encryptFile(data: data);
     }
     
-    public static func encryptFile(data: Data) -> Result<(Data, String),XMPPError> {
-        
+    public static func encryptFile(data: Data) throws -> (Data, String) {
         let key = SymmetricKey(size: .bits256);
 
         guard let sealed = try? AES.GCM.seal(data, using: key) else {
-            return .failure(.not_acceptable("Invalid encryption key"));
+            throw XMPPError(condition: .not_acceptable, message: "Invalid encryption key");
         }
         
         let combinedKey = Data(sealed.nonce) + key.data();
 
-        return .success((sealed.ciphertext + sealed.tag, combinedKey.hex()));
+        return (sealed.ciphertext + sealed.tag, combinedKey.hex());
     }
     
     private func _encode(message: Message, for remoteAddresses: [SignalAddress], forSelf: Bool = true) -> EncryptionResult<Message,SignalError> {
@@ -515,8 +508,8 @@ open class OMEMOModule: AbstractPEPModule, XmppModule, Resetable {
             case .success(let items):
                 print("got published devices:", items.items.first as Any);
                 self.checkAndPublishDevicesListIfNeeded(jid: pepJid, list: items.items.first?.payload, removeDevicesWithIds: removeDevicesWithIds);
-            case .failure(let pubsubError):
-                guard pubsubError.error == .item_not_found || pubsubError.error == .internal_server_error() else {
+            case .failure(let error):
+                guard error.condition == .item_not_found || error.condition == .internal_server_error else {
                     return;
                 }
                 self.checkAndPublishDevicesListIfNeeded(jid: pepJid, list: nil);
@@ -572,9 +565,9 @@ open class OMEMOModule: AbstractPEPModule, XmppModule, Resetable {
                     case .success(_):
                         self.isReady = true;
                         print("device id:", ourDeviceIdStr, " successfully registered!");
-                    case .failure(let pubsubError):
+                    case .failure(let error):
                         print("item registration failed!");
-                        if pubsubError.error == .conflict() {
+                        if error.condition == .conflict {
                             pubsubModule.retrieveNodeConfiguration(from: jid, node: OMEMOModule.DEVICES_LIST_NODE, completionHandler: { result in
                                 switch result {
                                 case .success(let form):
@@ -673,8 +666,8 @@ open class OMEMOModule: AbstractPEPModule, XmppModule, Resetable {
             switch result {
             case .success(let items):
                 self.publishDeviceBundle(currentBundle: items.items.first?.payload, completionHandler: completionHandler);
-            case .failure(let pubsubError):
-                guard pubsubError.error == .item_not_found || pubsubError.error == .internal_server_error() else {
+            case .failure(let error):
+                guard error.condition == .item_not_found || error.condition == .internal_server_error else {
                     return;
                 }
                 self.publishDeviceBundle(currentBundle: nil, completionHandler: completionHandler);
@@ -694,7 +687,7 @@ open class OMEMOModule: AbstractPEPModule, XmppModule, Resetable {
         withIds.forEach { deviceId in
             _ = self.storage.identityKeyStore.setStatus(active: false, forIdentity: SignalAddress(name: pepJid.description, deviceId: deviceId));
             
-            pubsubModule.deleteNode(from: pepJid, node: bundleNode(for: UInt32(bitPattern: deviceId)), completionHandler: nil);
+            pubsubModule.deleteNode(from: pepJid, node: bundleNode(for: UInt32(bitPattern: deviceId)), completionHandler: { _ in });
         }
         
         self.publishDeviceIdIfNeeded(removeDevicesWithIds: ids);
@@ -886,7 +879,7 @@ open class OMEMOModule: AbstractPEPModule, XmppModule, Resetable {
         switch result {
         case .successMessage(let message, _):
             message.hints = [.store];
-            self.write(message);
+            self.write(stanza: message);
         case .failure(let error):
             print("failed to complete session for address: \(address), error: \(error)");
         }
@@ -923,8 +916,8 @@ open class OMEMOModule: AbstractPEPModule, XmppModule, Resetable {
                     self.markDeviceAsFailed(for: pepJid, andDeviceId: address.deviceId);
                 }
                 completionHandler?();
-            case .failure(let pubsubError):
-                if let account = self.context?.userBareJid, pubsubError.error == .item_not_found, account == pepJid {
+            case .failure(let error):
+                if let account = self.context?.userBareJid, error.condition == .item_not_found, account == pepJid {
                     // there is not bundle for local device-id
                     self.devicesQueue.async {
                         self.ownBrokenDevices.append(address.deviceId);
