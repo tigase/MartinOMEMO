@@ -126,14 +126,14 @@ open class OMEMOModule: AbstractPEPModule, XmppModule, Resetable {
         throw XMPPError(condition: .feature_not_implemented);
     }
     
-    public func decrypt(message: Message, serverMsgId: String? = nil) async throws -> DecryptionResult {
+    public func decrypt(message: Message, serverMsgId: String? = nil) throws -> DecryptionResult {
         guard let from = message.from?.bareJid else {
             throw SignalError.invalidArgument;
         }
-        return try await self.decrypt(message: message, from: from, serverMsgId: serverMsgId)
+        return try self.decrypt(message: message, from: from, serverMsgId: serverMsgId)
     }
     
-    public func decrypt(message: Message, from: BareJID, serverMsgId: String? = nil) async throws -> DecryptionResult {
+    public func decrypt(message: Message, from: BareJID, serverMsgId: String? = nil) throws -> DecryptionResult {
         guard let context = context else {
             throw SignalError.unknown;
         }
@@ -181,10 +181,12 @@ open class OMEMOModule: AbstractPEPModule, XmppModule, Resetable {
                     switch error {
                     case .noSession, .invalidMessage:
                         if serverMsgId != nil {
-                            let isPostponed = await state.postponedHealing(for: message.type == .groupchat ? message.from?.bareJid : nil, address: key.address)
-                            if !isPostponed {
-                                await self.buildSession(forAddress: key.address);
-                                self.completeSession(forAddress: key.address);
+                            Task {
+                                let isPostponed = await state.postponedHealing(for: message.type == .groupchat ? message.from?.bareJid : nil, address: key.address)
+                                if !isPostponed {
+                                    await self.buildSession(forAddress: key.address);
+                                    self.completeSession(forAddress: key.address);
+                                }
                             }
                         }
                     default:
@@ -214,10 +216,12 @@ open class OMEMOModule: AbstractPEPModule, XmppModule, Resetable {
             
             if prekey {
                 // pre key was removed so we need to republish the bundle!
-                let isPostponed = await state.postponedSession(for: message.type == .groupchat ? message.from?.bareJid : nil, address: address)
-                if !isPostponed {
-                    if self.storage.preKeyStore.flushDeletedPreKeys() {
-                        try? await self.publishDeviceBundleIfNeeded();
+                Task {
+                    let isPostponed = await state.postponedSession(for: message.type == .groupchat ? message.from?.bareJid : nil, address: address)
+                    if !isPostponed {
+                        if self.storage.preKeyStore.flushDeletedPreKeys() {
+                            try? await self.publishDeviceBundleIfNeeded();
+                        }
                     }
                 }
             }
