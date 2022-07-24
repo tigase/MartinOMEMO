@@ -46,7 +46,7 @@ struct KeyDecryptionResult {
     }
 }
 
-open class OMEMOModule: AbstractPEPModule, XmppModule, Resetable {
+open class OMEMOModule: AbstractPEPModule, XmppModule, Resetable, @unchecked Sendable {
     
     public static let ID = "omemo";
     public static let IDENTIFIER = XmppModuleIdentifier<OMEMOModule>();
