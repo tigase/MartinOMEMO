@@ -20,7 +20,7 @@
 //
 
 import Foundation
-import TigaseSwift
+import Martin
 
 /// Actor for storing data by OMEMO module
 actor OMEMOState {
