@@ -1,7 +1,7 @@
 import XCTest
 
-import TigaseSwiftOMEMOTests
+import MartinOMEMOTests
 
 var tests = [XCTestCaseEntry]()
-tests += TigaseSwiftOMEMOTests.allTests()
+tests += MartinOMEMOTests.allTests()
 XCTMain(tests)

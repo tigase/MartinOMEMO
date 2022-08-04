@@ -20,7 +20,7 @@
 //
 
 import Foundation
-import TigaseSwift
+import Martin
 import libsignal
 import Combine
 import CryptoKit
