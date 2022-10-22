@@ -27,7 +27,7 @@ open class SignalContext {
     public fileprivate(set) var globalContext: OpaquePointer?;
     fileprivate let provider: SignalCryptoProvider = SignalCryptoProvider();
     fileprivate let lock: NSRecursiveLock = NSRecursiveLock();
-    let storage: SignalStorage;
+    weak var storage: SignalStorage?;
     
     public init?(withStorage: SignalStorage) {
         self.storage = withStorage;
@@ -42,7 +42,14 @@ open class SignalContext {
         signal_context_set_locking_functions(globalContext, signalLock, signalUnlock)
         signal_context_set_log_function(globalContext, signalLog);
 
-        self.storage.setup(withContext: self);
+        self.storage?.setup(withContext: self);
+    }
+    
+    deinit {
+        if let ctx = globalContext {
+            signal_context_destroy(ctx);
+        }
+        globalContext = nil;
     }
     
     open func generateRegistrationId() -> UInt32 {
@@ -160,7 +167,7 @@ open class SignalSignedPreKey {
     
     public init(fromSignedPreKey: OpaquePointer) {
         self.signedPreKey = fromSignedPreKey;
-        signal_type_ref(signedPreKey);
+//        signal_type_ref(signedPreKey);
     }
 
     public convenience init?(fromSerializedData: Data) {
@@ -215,7 +222,7 @@ open class SignalPreKey {
     
     public init(fromPreKey: OpaquePointer) {
         self.preKey = fromPreKey;
-        signal_type_ref(self.preKey);
+//        signal_type_ref(self.preKey);
     }
     
     public convenience init?(fromSerializedData: Data) {

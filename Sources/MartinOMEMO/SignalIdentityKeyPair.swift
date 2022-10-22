@@ -107,6 +107,9 @@ open class SignalIdentityKeyPair: SignalIdentityKey, SignalIdentityKeyPairProtoc
         }) else {
             return nil;
         }
+        defer {
+            signal_type_unref(keyPair);
+        }
         self.init(withKeyPair: keyPair);
     }
     

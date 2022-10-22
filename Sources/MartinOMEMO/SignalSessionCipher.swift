@@ -31,7 +31,7 @@ open class SignalSessionCipher {
     public init?(withAddress address: SignalAddress, andContext context: SignalContext) {
         var cipher: OpaquePointer?;
         self.address = address;
-        guard session_cipher_create(&cipher, context.storage.storeContext, self.address.address, context.globalContext) >= 0 && cipher != nil else {
+        guard let storage = context.storage, session_cipher_create(&cipher, storage.storeContext, self.address.address, context.globalContext) >= 0 && cipher != nil else {
             return nil;
         }
         self.context = context;

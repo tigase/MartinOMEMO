@@ -134,7 +134,7 @@ open class OMEMOModule: AbstractPEPModule, XmppModule, Resetable, @unchecked Sen
     }
     
     public func decrypt(message: Message, from: BareJID, serverMsgId: String? = nil) throws -> DecryptionResult {
-        guard let context = context else {
+        guard let context = context, let storage = signalContext.storage else {
             throw SignalError.unknown;
         }
 
@@ -146,12 +146,12 @@ open class OMEMOModule: AbstractPEPModule, XmppModule, Resetable, @unchecked Sen
             throw SignalError.invalidArgument;
         }
         
-        let localDeviceIdStr = String(signalContext.storage.identityKeyStore.localRegistrationId());
+        let localDeviceIdStr = String(storage.identityKeyStore.localRegistrationId());
         
         guard headerEl.firstChild(where: { (el) -> Bool in
             return el.name == "key" && el.attribute("rid") == localDeviceIdStr;
         }) != nil else {
-            guard context.userBareJid != from || sid != signalContext.storage.identityKeyStore.localRegistrationId() else {
+            guard context.userBareJid != from || sid != storage.identityKeyStore.localRegistrationId() else {
                 throw SignalError.duplicateMessage;
             }
             guard encryptedEl.firstChild(name: "payload") != nil else {
@@ -372,7 +372,7 @@ open class OMEMOModule: AbstractPEPModule, XmppModule, Resetable, @unchecked Sen
     }
     
     private func _encrypt(message: Message, for remoteAddresses: [SignalAddress], forSelf: Bool = true) throws -> EncryptedMessage {
-        guard let context = self.context else {
+        guard let context = self.context, let storage = signalContext.storage else {
             throw SignalError.unknown;
         }
         
@@ -387,7 +387,7 @@ open class OMEMOModule: AbstractPEPModule, XmppModule, Resetable, @unchecked Sen
                 
         let combinedKey = key.data() + sealed.tag;
         let header = Element(name: "header");
-        header.attribute("sid", newValue: String(signalContext.storage.identityKeyStore.localRegistrationId()));
+        header.attribute("sid", newValue: String(storage.identityKeyStore.localRegistrationId()));
         encryptedEl.addChild(header);
         
         let localAddresses = forSelf ? storage.sessionStore.allDevices(for: context.userBareJid.description, activeAndTrusted: true).map({ (deviceId) -> SignalAddress in
@@ -642,7 +642,7 @@ open class OMEMOModule: AbstractPEPModule, XmppModule, Resetable, @unchecked Sen
         let signedPreKeyId = storage.signedPreKeyStore.countSignedPreKeys();
         var signedPreKey: SignalSignedPreKey? = nil;
         if (!regenerate) && (signedPreKeyId != 0) {
-            if let data = signalContext.storage.signedPreKeyStore.loadSignedPreKey(withId: UInt32(signedPreKeyId)) {
+            if let data = signalContext.storage?.signedPreKeyStore.loadSignedPreKey(withId: UInt32(signedPreKeyId)) {
                 signedPreKey = SignalSignedPreKey(fromSerializedData: data);
             }
         }
@@ -654,7 +654,7 @@ open class OMEMOModule: AbstractPEPModule, XmppModule, Resetable, @unchecked Sen
             guard signedPreKey != nil else {
                 return nil;
             }
-            guard signalContext.storage.signedPreKeyStore.storeSignedPreKey(signedPreKey!.serializedData!, withId: signedPreKey!.preKeyId) else {
+            guard signalContext.storage?.signedPreKeyStore.storeSignedPreKey(signedPreKey!.serializedData!, withId: signedPreKey!.preKeyId) ?? false else {
                 return nil;
             }
         }

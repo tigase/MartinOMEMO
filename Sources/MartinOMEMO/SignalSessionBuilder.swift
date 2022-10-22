@@ -30,7 +30,7 @@ open class SignalSessionBuilder {
     
     init?(withAddress addr: SignalAddress, andContext ctx: SignalContext) {
         var builder: OpaquePointer?;
-        guard session_builder_create(&builder, ctx.storage.storeContext!, addr.address, ctx.globalContext) >= 0 && builder != nil else {
+        guard let storage = ctx.storage, session_builder_create(&builder, storage.storeContext!, addr.address, ctx.globalContext) >= 0 && builder != nil else {
             return nil;
         }
         self.address = addr;
