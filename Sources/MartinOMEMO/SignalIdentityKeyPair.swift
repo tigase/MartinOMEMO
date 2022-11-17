@@ -28,9 +28,6 @@ open class SignalIdentityKeyPair: SignalIdentityKey, SignalIdentityKeyPairProtoc
     
     fileprivate var _keyPairPointer: OpaquePointer?;
     public var keyPairPointer: OpaquePointer? {
-        if _keyPairPointer == nil {
-            ec_key_pair_create(&_keyPairPointer, publicKeyPointer, privateKeyPointer);
-        }
         return _keyPairPointer;
     }
 
@@ -89,12 +86,16 @@ open class SignalIdentityKeyPair: SignalIdentityKey, SignalIdentityKeyPairProtoc
         self.privateKeyPointer = privateKeyPointer;
         signal_type_ref(self.privateKeyPointer);
         super.init(publicKeyPointer: publicKeyPointer);
+        ec_key_pair_create(&_keyPairPointer, publicKeyPointer, privateKeyPointer);
+        signal_type_ref(self.keyPairPointer!)
     }
     
     public init(withKeyPair keyPair: OpaquePointer) {
         privateKeyPointer = ratchet_identity_key_pair_get_private(keyPair);
         signal_type_ref(self.privateKeyPointer);
         super.init(publicKeyPointer: ratchet_identity_key_pair_get_public(keyPair));
+        ec_key_pair_create(&_keyPairPointer, publicKeyPointer, privateKeyPointer);
+        signal_type_ref(self.keyPairPointer!)
     }
     
     public convenience init?(fromKeyPairData data: Data) {
