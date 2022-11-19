@@ -34,30 +34,30 @@ open class SignalIdentityKey: SignalIdentityKeyProtocol {
         });
     }
     
-    public let publicKeyPointer: OpaquePointer;
-
-    fileprivate var _publicKey: Data?;
-    public var publicKey: Data? {
-        if _publicKey == nil {
-            var buffer: OpaquePointer?;
-            guard ec_public_key_serialize(&buffer, publicKeyPointer) == 0 && buffer != nil else {
-                return nil;
-            }
-            _publicKey = Data(bytes: signal_buffer_data(buffer), count: signal_buffer_len(buffer));
-            signal_buffer_bzero_free(buffer);
-        }
-        return _publicKey;
-    }
-    
-    public convenience init?(publicKey: Data?) {
-        guard publicKey != nil else {
-            return nil;
-        }
-        guard let publicKeyPointer = SignalIdentityKey.publicKey(from: publicKey!) else {
+    public static func serialize(publicKeyPointer: OpaquePointer) -> Data? {
+        var buffer: OpaquePointer?;
+        guard ec_public_key_serialize(&buffer, publicKeyPointer) == 0 && buffer != nil else {
             return nil;
         }
         
-        self.init(publicKeyPointer: publicKeyPointer);
+        defer {
+            signal_buffer_bzero_free(buffer);
+        }
+        return Data(bytes: signal_buffer_data(buffer), count: signal_buffer_len(buffer));
+    }
+    
+    public let publicKeyPointer: OpaquePointer;
+
+    public var publicKeyData: Data? {
+        return SignalIdentityKey.serialize(publicKeyPointer: publicKeyPointer);
+    }
+    
+    public convenience init?(data: Data?) {
+        guard let data = data, let pointer = SignalIdentityKey.publicKey(from: data) else {
+            return nil;
+        }
+        
+        self.init(publicKeyPointer: pointer);
     }
     
     public init(publicKeyPointer: OpaquePointer) {
@@ -69,7 +69,8 @@ open class SignalIdentityKey: SignalIdentityKeyProtocol {
         signal_type_unref(publicKeyPointer);
     }
     
-    open func serialized() -> Data {
-        return publicKey!;
+    public func serialized() -> Data {
+        return publicKeyData!;
     }
+    
 }

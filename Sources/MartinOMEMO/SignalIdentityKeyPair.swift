@@ -22,32 +22,34 @@
 import Foundation
 import libsignal
 
-open class SignalIdentityKeyPair: SignalIdentityKey, SignalIdentityKeyPairProtocol {
+open class SignalIdentityKeyPair: SignalIdentityKeyProtocol, SignalIdentityKeyPairProtocol {
+
+    public let keyPairPointer: OpaquePointer;
+
+    public var publicKeyPointer: OpaquePointer {
+        return ratchet_identity_key_pair_get_public(keyPairPointer);
+    }
     
-    public let privateKeyPointer: OpaquePointer;
+    public var publicKeyData: Data? {
+        return SignalIdentityKey.serialize(publicKeyPointer: publicKeyPointer);
+    }
     
-    fileprivate var _keyPairPointer: OpaquePointer?;
-    public var keyPairPointer: OpaquePointer? {
-        return _keyPairPointer;
+    public var privateKeyPointer: OpaquePointer {
+        return ratchet_identity_key_pair_get_private(keyPairPointer);
     }
 
-    fileprivate var _privateKey: Data?;
-    public var privateKey: Data? {
-        if _privateKey == nil {
-            var buffer: OpaquePointer?;
-            guard ec_private_key_serialize(&buffer, privateKeyPointer) == 0 && buffer != nil else {
-                return nil;
-            }
-            _privateKey = Data(bytes: signal_buffer_data(buffer), count: signal_buffer_len(buffer));
-            signal_buffer_bzero_free(buffer);
-        }
-        return _privateKey;
-    }
-    
-    public var keyPair: Data? {
-        guard let keyPairPointer = self.keyPairPointer else {
+    public var privateKeyData: Data? {
+        var buffer: OpaquePointer?;
+        guard ec_private_key_serialize(&buffer, privateKeyPointer) == 0 && buffer != nil else {
             return nil;
         }
+        defer {
+            signal_buffer_bzero_free(buffer);
+        }
+        return Data(bytes: signal_buffer_data(buffer), count: signal_buffer_len(buffer));
+    }
+    
+    public var keyPairData: Data? {
         var buffer: OpaquePointer?;
         guard ratchet_identity_key_pair_serialize(&buffer, keyPairPointer) == 0 && buffer != nil else {
             return nil;
@@ -58,7 +60,7 @@ open class SignalIdentityKeyPair: SignalIdentityKey, SignalIdentityKeyPairProtoc
         return Data(bytes: signal_buffer_data(buffer), count: signal_buffer_len(buffer));
     }
     
-    public init?(publicKey: Data?, privateKey: Data?) {
+    public convenience init?(publicKey: Data?, privateKey: Data?) {
         guard publicKey != nil && privateKey != nil else {
             return nil;
         }
@@ -83,19 +85,18 @@ open class SignalIdentityKeyPair: SignalIdentityKey, SignalIdentityKeyPairProtoc
             return nil;
         }
 
-        self.privateKeyPointer = privateKeyPointer;
-        signal_type_ref(self.privateKeyPointer);
-        super.init(publicKeyPointer: publicKeyPointer);
-        ec_key_pair_create(&_keyPairPointer, publicKeyPointer, privateKeyPointer);
-        signal_type_ref(self.keyPairPointer!)
+        var pointer: OpaquePointer?;
+        ec_key_pair_create(&pointer, publicKeyPointer, privateKeyPointer);
+        guard let pointer = pointer else {
+            return nil;
+        }
+        
+        self.init(withKeyPairPointer: pointer);
     }
     
-    public init(withKeyPair keyPair: OpaquePointer) {
-        privateKeyPointer = ratchet_identity_key_pair_get_private(keyPair);
-        signal_type_ref(self.privateKeyPointer);
-        super.init(publicKeyPointer: ratchet_identity_key_pair_get_public(keyPair));
-        ec_key_pair_create(&_keyPairPointer, publicKeyPointer, privateKeyPointer);
-        signal_type_ref(self.keyPairPointer!)
+    public init(withKeyPairPointer keyPairPointer: OpaquePointer) {
+        signal_type_ref(keyPairPointer);
+        self.keyPairPointer = keyPairPointer;
     }
     
     public convenience init?(fromKeyPairData data: Data) {
@@ -108,30 +109,23 @@ open class SignalIdentityKeyPair: SignalIdentityKey, SignalIdentityKeyPairProtoc
         }) else {
             return nil;
         }
-        defer {
-            signal_type_unref(keyPair);
-        }
-        self.init(withKeyPair: keyPair);
+        self.init(withKeyPairPointer: keyPair);
     }
     
     deinit {
-        signal_type_unref(privateKeyPointer);
-        if keyPairPointer != nil {
-            signal_type_unref(keyPairPointer);
-            _keyPairPointer = nil;
-        }
+        signal_type_unref(keyPairPointer);
     }
     
     public static func generateKeyPair(context: SignalContext) -> SignalIdentityKeyPair? {
         var keyPair: OpaquePointer? = nil;
         let result = signal_protocol_key_helper_generate_identity_key_pair(&keyPair, context.globalContext);
-        guard result >= 0 && keyPair != nil else {
+        guard result >= 0, let keyPair = keyPair else {
             return nil;
         }
-        return SignalIdentityKeyPair(withKeyPair: keyPair!);
+        return SignalIdentityKeyPair(withKeyPairPointer: keyPair);
     }
-    
-    override open func serialized() -> Data {
-        return keyPair!;
+ 
+    public func serialized() -> Data {
+        return keyPairData!;
     }
 }

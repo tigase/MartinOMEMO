@@ -273,6 +273,7 @@ open class OMEMOModule: AbstractPEPModule, XmppModule, Resetable, @unchecked Sen
     
     public func encrypt(message: Message, for jids: [BareJID], withStoreHint: Bool = true) async throws -> EncryptedMessage {
         let addresses = try await self.addresses(for: jids);
+        await ensureSessions(forAddresses: addresses);
         return try self.encrypt(message: message, forAddresses: addresses, withStoreHint:  withStoreHint);
     }
      
@@ -320,7 +321,7 @@ open class OMEMOModule: AbstractPEPModule, XmppModule, Resetable, @unchecked Sen
         })
     }
     
-    private func ensureSessionForAddreses(_ addresses: [SignalAddress]) async {
+    private func ensureSessions(forAddresses addresses: [SignalAddress]) async {
         await addresses.filter({ !self.storage.sessionStore.containsSessionRecord(forAddress: $0) }).concurrentForEach({ await self.buildSession(forAddress: $0);
         })
     }
@@ -397,10 +398,11 @@ open class OMEMOModule: AbstractPEPModule, XmppModule, Resetable, @unchecked Sen
         header.addChildren(destinations.map({ (addr) -> Result<SignalSessionCipher.Key,SignalError> in
                 // TODO: maybe we should cache this session?
                 guard let session = SignalSessionCipher(withAddress: addr, andContext: self.signalContext) else {
+                    // FIXME: is this causing an error?
                     return .failure(.noMemory);
                 }
                 return session.encrypt(data: combinedKey);
-            }).map({ (result) -> Element? in
+            }).compactMap({ (result) -> Element? in
                 switch result {
                 case .success(let key):
                     let keyEl = Element(name: "key", cdata: key.key.base64EncodedString());
@@ -410,12 +412,9 @@ open class OMEMOModule: AbstractPEPModule, XmppModule, Resetable, @unchecked Sen
                     }
                     return keyEl;
                 case .failure(_):
+                    // FIXME: is this causing an error?
                     return nil;
                 }
-            }).filter({ (el) -> Bool in
-                return el != nil;
-            }).map({ el -> Element in
-                return el!;
             }));
             header.addChild(Element(name: "iv", cdata: Data(sealed.nonce).base64EncodedString()));
 
@@ -573,7 +572,7 @@ open class OMEMOModule: AbstractPEPModule, XmppModule, Resetable, @unchecked Sen
                 await self.removeDevices(withIds: brokenIds);
             }
             
-            await ensureSessionForAddreses(knownActiveDevices.filter({ $0 != self.storage.identityKeyStore.localRegistrationId() }).compactMap({ SignalAddress(name: jid.description, deviceId: $0) }));
+            await ensureSessions(forAddresses: knownActiveDevices.filter({ $0 != self.storage.identityKeyStore.localRegistrationId() }).compactMap({ SignalAddress(name: jid.description, deviceId: $0) }));
         }
         await state.updateKnownActiveDevices(knownActiveDevices, for: jid);
         self.activeDevicesPublisher.send(AvailabilityChanged(jid: jid, activeDevices: knownActiveDevices));
@@ -662,7 +661,7 @@ open class OMEMOModule: AbstractPEPModule, XmppModule, Resetable, @unchecked Sen
     }
 
     private func publishDeviceBundle(currentBundle: Element?) async throws {
-        guard let identityPublicKey = storage.identityKeyStore.keyPair()?.publicKey?.base64EncodedString() else {
+        guard let identityPublicKey = storage.identityKeyStore.keyPair()?.publicKeyData?.base64EncodedString() else {
             return;
         }
 
@@ -718,7 +717,7 @@ open class OMEMOModule: AbstractPEPModule, XmppModule, Resetable, @unchecked Sen
         let bundleEl = Element(name: "bundle", xmlns: OMEMOModule.XMLNS);
         bundleEl.addChild(Element(name: "signedPreKeyPublic", cdata: signedPreKey.publicKeyData!.base64EncodedString(), attributes: ["signedPreKeyId": String(signedPreKey.preKeyId)]));
         bundleEl.addChild(Element(name: "signedPreKeySignature", cdata: signedPreKey.signature.base64EncodedString()));
-        bundleEl.addChild(Element(name: "identityKey", cdata: identityKeyPair.publicKey!.base64EncodedString()));
+        bundleEl.addChild(Element(name: "identityKey", cdata: identityKeyPair.publicKeyData!.base64EncodedString()));
         let preKeysElems = preKeys.map({ (preKey) -> Element in
             return Element(name: "preKeyPublic", cdata: preKey.serializedPublicKey!.base64EncodedString(), attributes: ["preKeyId": String(preKey.preKeyId)]);
         });

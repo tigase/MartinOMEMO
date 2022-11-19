@@ -36,7 +36,7 @@ open class SignalAddress: Hashable, CustomStringConvertible {
     public let name: String;
     public let deviceId: Int32;
     
-    fileprivate let nameBytes: UnsafeMutablePointer<Int8>;
+    private let nameBytes: UnsafeMutablePointer<Int8>;
     public let address: UnsafeMutablePointer<signal_protocol_address>;
     
     public var description: String {

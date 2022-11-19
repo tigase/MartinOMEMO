@@ -77,12 +77,8 @@ open class SignalContext {
     }
     
     open func generateSignedPreKey(withIdentity identity: SignalIdentityKeyPairProtocol, signedPreKeyId: UInt32, timestamp: Date = Date()) -> SignalSignedPreKey? {
-        guard let keyPair = identity.keyPairPointer else {
-            return nil;
-        }
-        
         var signed_pre_key: OpaquePointer?;
-        guard signal_protocol_key_helper_generate_signed_pre_key(&signed_pre_key, keyPair, signedPreKeyId, UInt64(timestamp.timeIntervalSince1970) * 1000, globalContext) >= 0 && signed_pre_key != nil else {
+        guard signal_protocol_key_helper_generate_signed_pre_key(&signed_pre_key, identity.keyPairPointer, signedPreKeyId, UInt64(timestamp.timeIntervalSince1970) * 1000, globalContext) >= 0 && signed_pre_key != nil else {
             return nil;
         }
         

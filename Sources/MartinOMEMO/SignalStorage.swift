@@ -168,16 +168,16 @@ public protocol SignalIdentityKeyStoreProtocol: AnyObject {
 
 public protocol SignalIdentityKeyProtocol: AnyObject {
     var publicKeyPointer: OpaquePointer { get }
-    var publicKey: Data? { get }
+    var publicKeyData: Data? { get }
     
     func serialized() -> Data;
 }
 
 public protocol SignalIdentityKeyPairProtocol: SignalIdentityKeyProtocol {
-    var keyPairPointer: OpaquePointer? { get }
-    var keyPair: Data? { get }
+    var keyPairPointer: OpaquePointer { get }
+    var keyPairData: Data? { get }
     var privateKeyPointer: OpaquePointer { get }
-    var privateKey: Data? { get }
+    var privateKeyData: Data? { get }
 }
 
 public protocol SignalSenderKeyStoreProtocol: AnyObject {
@@ -320,14 +320,14 @@ fileprivate func get_identity_key_pair(publicData: UnsafeMutablePointer<OpaquePo
         return -1;
     }
     
-    if let publicKey = keyPair.publicKey {
+    if let publicKey = keyPair.publicKeyData {
         publicKey.withUnsafeBytes { (bytes: UnsafeRawBufferPointer) -> Void in
             let buffer = signal_buffer_create(bytes.baseAddress!.assumingMemoryBound(to: UInt8.self), publicKey.count);
             publicData?.initialize(to: buffer);
         }
     }
 
-    if let privateKey = keyPair.privateKey {
+    if let privateKey = keyPair.privateKeyData {
         privateKey.withUnsafeBytes { (bytes: UnsafeRawBufferPointer) -> Void in
             let buffer = signal_buffer_create(bytes.baseAddress!.assumingMemoryBound(to: UInt8.self), privateKey.count);
             privateData?.initialize(to: buffer);
