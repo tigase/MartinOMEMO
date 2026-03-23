@@ -238,4 +238,18 @@ open class SignalPreKey {
         signal_type_unref(preKey);
     }
     
+    public func validate(identityKey: SignalIdentityKeyPairProtocol, signedPreKeySignature: Data) -> Bool {
+        guard let serializedPublicKey else {
+            return false;
+        }
+        return signedPreKeySignature.withUnsafeBytes({ signatureData -> Bool in
+            return serializedPublicKey.withUnsafeBytes({ signedData -> Bool in
+                return curve_verify_signature(identityKey.publicKeyPointer,
+                        signedData,
+                                              serializedPublicKey.count,
+                                              signatureData.baseAddress?.assumingMemoryBound(to: UInt8.self),
+                                              signedPreKeySignature.count) == 0;
+            })
+        })
+    }
 }

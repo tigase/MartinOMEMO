@@ -675,7 +675,10 @@ open class OMEMOModule: AbstractPEPModule, XmppModule, Resetable, @unchecked Sen
     }
 
     private func publishDeviceBundle(currentBundle: Element?) async throws {
-        guard let identityPublicKey = storage.identityKeyStore.keyPair()?.publicKeyData?.base64EncodedString() else {
+        guard let identityKeyPair = storage.identityKeyStore.keyPair() else {
+            return;
+        }
+        guard let identityPublicKey = identityKeyPair.publicKeyData?.base64EncodedString() else {
             return;
         }
 
@@ -688,23 +691,40 @@ open class OMEMOModule: AbstractPEPModule, XmppModule, Resetable, @unchecked Sen
             let signatureBase64 = signedPreKey.signature.base64EncodedString();
             var changed = flush || signedPreKeyBase64 != currentBundle?.firstChild(name: "signedPreKeyPublic")?.value || signatureBase64 != currentBundle?.firstChild(name: "signedPreKeySignature")?.value;
             
-            let currentKeys = currentBundle?.firstChild(name: "prekeys")?.compactMapChildren({ preKeyEl -> UInt32? in
+            let currentKeys =  currentBundle?.firstChild(name: "prekeys")?.compactMapChildren({ preKeyEl -> UInt32? in
                 guard let preKeyId = preKeyEl.attribute("preKeyId") else {
                     return nil;
                 }
                 return UInt32(preKeyId);
             });
             
+            var invalidKeys: [UInt32] = []
             var validKeys = currentKeys?.map({ (preKeyId) -> SignalPreKey? in
                 guard let key = self.storage.preKeyStore.loadPreKey(withId: preKeyId) else {
                     return nil;
                 }
                 return SignalPreKey(fromSerializedData: key);
-            }).filter({ (preKey) -> Bool in
+            }).map({ key -> SignalPreKey? in
+                guard let key else {
+                    return nil;
+                }
+                guard key.validate(identityKey: identityKeyPair, signedPreKeySignature: signedPreKey.signature) else {
+                    invalidKeys.append(key.preKeyId)
+                    _ = self.storage.preKeyStore.deletePreKey(withId: key.preKeyId)
+                    return nil;
+                }
+                return key;
+            }).filter({ preKey -> Bool in
                 return preKey != nil;
             }).map({ preKey -> SignalPreKey in
                 return preKey!;
             }) ?? [];
+            
+            if (!invalidKeys.isEmpty) {
+                let account = context?.userBareJid.description
+                logger.debug("for account \(account ?? "nil") had following invalid pre keys: \(invalidKeys.sorted()) and were deleted...")
+            }
+                        
             let needKeys = 100 - validKeys.count;
             if needKeys > 0 {
                 changed = true;
